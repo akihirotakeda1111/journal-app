@@ -1,0 +1,80 @@
+/* ====== Journal List ====== */
+.row-container {
+  background: #262626;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.row-header {
+  background: #303030;
+  padding: 0.75rem;
+  border-bottom: 1px solid #3a3a3a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.row-header-left {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.row-header-date {
+  font-weight: bold;
+  color: #e5e5e5;
+}
+
+.row-header-desc {
+  color: #b5b5b5;
+}
+
+.row-header-id {
+  color: #777;
+}
+
+.btn-history {
+  background: #3d3d3d;
+  color: #ccc;
+}
+
+.btn-edit {
+  background: #3b4a5a;
+  color: #dce3ea;
+}
+
+.btn-edit-active {
+  background: #555;
+  color: #ddd;
+}
+
+/* ====== Table ====== */
+.row-body {
+  display: flex;
+  border-top: 1px solid #3a3a3a;
+}
+
+.row-col {
+  flex: 1;
+}
+
+.row-table {
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.row-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+/* ====== Edit area ====== */
+.edit-area {
+  border-top: 2px solid #4a5568;
+  background: #2f3540;
+  padding: 1rem;
+  color: #e5e5e5;
+}

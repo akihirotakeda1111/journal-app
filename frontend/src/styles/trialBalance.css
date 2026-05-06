@@ -1,0 +1,122 @@
+.tb-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  color: #e5e7eb;
+}
+
+.tb-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 1px solid #4b5563;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.tb-header h2 {
+  font-size: 22px;
+  font-weight: bold;
+  color: #f3f4f6;
+}
+
+.tb-filter {
+  display: flex;
+  gap: 12px;
+}
+
+.tb-filter label {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.tb-filter input[type="date"] {
+  background: #1f2937;
+  border: 1px solid #4b5563;
+  padding: 4px 6px;
+  color: #f3f4f6;
+  border-radius: 4px;
+}
+
+/* Table */
+.tb-table-wrapper {
+  background: #1f2937;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.tb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tb-table thead {
+  background: #374151;
+}
+
+.tb-table th {
+  padding: 10px;
+  text-align: center;
+  color: #d1d5db;
+  font-weight: bold;
+}
+
+.tb-table td {
+  padding: 10px;
+  border-top: 1px solid #4b5563;
+}
+
+.tb-code {
+  font-family: monospace;
+  color: #9ca3af;
+}
+
+.tb-debit {
+  text-align: right;
+  color: #93c5fd;
+}
+
+.tb-credit {
+  text-align: right;
+  color: #fca5a5;
+}
+
+.tb-total-label {
+  text-align: right;
+  padding-right: 10px;
+  color: #e5e7eb;
+}
+
+.tb-total {
+  font-weight: bold;
+  background: #111827;
+}
+
+/* Alerts */
+.tb-alert {
+  margin-top: 16px;
+  padding: 12px;
+  background: #7f1d1d;
+  border-left: 4px solid #ef4444;
+  color: #fee2e2;
+  border-radius: 4px;
+}
+
+.tb-ok {
+  margin-top: 16px;
+  padding: 12px;
+  background: #065f46;
+  border-left: 4px solid #10b981;
+  color: #d1fae5;
+  border-radius: 4px;
+}
+
+/* Loading / Error */
+.tb-loading,
+.tb-error,
+.tb-empty {
+  padding: 16px;
+  color: #9ca3af;
+}

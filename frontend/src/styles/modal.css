@@ -1,0 +1,56 @@
+/* ====== Modal Overlay ====== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+/* ====== Modal Container ====== */
+.modal-container {
+  background: #2b2b2b;
+  border: 1px solid #444;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 48rem;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+
+/* ====== Modal Header ====== */
+.modal-header {
+  background: #333;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-weight: bold;
+  color: #eee;
+}
+
+.modal-close {
+  color: #bbb;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: #fff;
+}
+
+/* ====== Modal Body ====== */
+.modal-body {
+  padding: 1rem;
+  overflow-y: auto;
+  flex: 1;
+  color: #ddd;
+}

@@ -1,0 +1,34 @@
+[
+    {
+        "model": "management.account",
+        "pk": "101",
+        "fields": {
+            "name": "現金",
+            "type": "ASSET"
+        }
+    },
+    {
+        "model": "management.account",
+        "pk": "201",
+        "fields": {
+            "name": "売掛金",
+            "type": "ASSET"
+        }
+    },
+    {
+        "model": "management.account",
+        "pk": "401",
+        "fields": {
+            "name": "売上",
+            "type": "REVENUE"
+        }
+    },
+    {
+        "model": "management.account",
+        "pk": "501",
+        "fields": {
+            "name": "仕入",
+            "type": "EXPENSE"
+        }
+    }
+]

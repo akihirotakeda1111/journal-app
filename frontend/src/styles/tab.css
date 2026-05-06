@@ -1,0 +1,36 @@
+.app-container {
+  padding: 20px;
+  color: #e5e7eb;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #4b5563;
+  padding-bottom: 6px;
+}
+
+.tab-item {
+  padding: 8px 16px;
+  background: #1f2937;
+  border: 1px solid #4b5563;
+  border-radius: 4px 4px 0 0;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tab-item:hover {
+  background: #374151;
+}
+
+.tab-item.active {
+  background: #111827;
+  color: #f3f4f6;
+  border-bottom: 2px solid #10b981;
+}
+
+.tab-content {
+  margin-top: 16px;
+}

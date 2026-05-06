@@ -1,0 +1,186 @@
+/* ====== Layout ====== */
+.container {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: #e5e5e5;
+}
+
+.section {
+  border-bottom: 1px solid #3a3a3a;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.row {
+  display: flex;
+  gap: 1rem;
+}
+
+.row > div {
+  flex: 1;
+}
+
+.debit {
+  color: #8ab4f8;
+}
+
+.credit {
+  color: #f28b82;
+}
+
+.desc {
+  color: #aaa;
+}
+
+/* ====== Labels & Inputs ====== */
+.label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #e5e5e5;
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem;
+  background: #2b2b2b;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #e5e5e5;
+}
+
+/* ====== Line rows ====== */
+.line-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.line-input {
+  padding: 0.4rem;
+  background: #2b2b2b;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #e5e5e5;
+}
+
+/* ====== Error ====== */
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.8rem;
+  margin: 0.25rem 0 0.5rem 0;
+}
+
+/* ====== Buttons ====== */
+.btn {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  width: 100%;
+  background: #3a3a3a;
+  color: #e5e5e5;
+}
+
+.btn-primary:disabled {
+  background: #555;
+}
+
+.btn-link {
+  color: #8ab4f8;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: none;
+}
+
+.btn-remove {
+  color: #ff6b6b;
+  background: none;
+}
+
+/* ====== Timeline ====== */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    #555,
+    transparent
+  );
+}
+
+/* ====== Timeline Item ====== */
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: 0.5rem;
+  width: 1rem;
+  height: 1rem;
+  background: #444;
+  border: 2px solid #888;
+  border-radius: 50%;
+}
+
+.timeline-card {
+  background: #262626;
+  border: 1px solid #444;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-left: 2rem;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+}
+
+/* ====== Badge ====== */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.badge-blue {
+  background: #3b4a5a;
+  color: #dce3ea;
+  border-color: #4a5a6a;
+}
+
+.badge-red {
+  background: #5a2c2c;
+  color: #f28b82;
+  border-color: #7a3a3a;
+}
+
+.badge-green {
+  background: #2f4a3a;
+  color: #b7e4c7;
+  border-color: #3a5a4a;
+}
+
+/* ====== Lines inside card ====== */
+.line-box {
+  background: #1f1f1f;
+  padding: 0.5rem;
+  border-radius: 4px;
+  color: #ccc;
+  font-size: 0.8rem;
+}

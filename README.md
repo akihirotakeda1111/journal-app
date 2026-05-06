@@ -1,0 +1,29 @@
+```mermaid
+erDiagram
+    journals ||--o{ journal_lines : "has many (1:N)"
+    journals |o--o| journals : "cancels/modifies (1:1 自己参照)"
+    accounts ||--o{ journal_lines : "used in (1:N)"
+
+    journals {
+        uuid id PK
+        date recorded_date "計上日"
+        text description "摘要"
+        varchar type "NORMAL / CANCEL"
+        uuid original_journal_id FK "元仕訳ID"
+        timestamp created_at "作成日時"
+    }
+
+    journal_lines {
+        bigserial id PK
+        uuid journal_id FK "仕訳ID"
+        varchar account_id FK "勘定科目ID"
+        numeric amount "金額（符号付き: 借方+, 貸方-）"
+    }
+
+    accounts {
+        varchar id PK "勘定科目コード"
+        text name "科目名"
+        varchar type "ASSET / LIABILITY / EQUITY / REVENUE / EXPENSE"
+        boolean is_active "有効フラグ"
+    }
+```
