@@ -1,13 +1,9 @@
 from django.db import transaction, IntegrityError
 from django.db.models import OuterRef, Exists
 from django.core.exceptions import ValidationError
-from rest_framework.response import Response
-from rest_framework import status
 from ..models import Journal, JournalLine
 from ..exceptions.journal_exceptions import JournalAlreadyExistsError
-from ..serializers.journal_with_lines import JournalWithLinesOutputSerializer
 from uuid6 import uuid7
-from uuid import UUID
 
 
 class JournalWithLinesService:
@@ -56,7 +52,7 @@ class JournalWithLinesService:
 
             raise
 
-        return Response({"id": journal.id}, status=status.HTTP_201_CREATED)
+        return journal
 
     @staticmethod
     @transaction.atomic
@@ -118,25 +114,13 @@ class JournalWithLinesService:
                     )
                 JournalLine.objects.bulk_create(new_lines)
 
-                return Response({"id": new_journal.id}, status=status.HTTP_201_CREATED)
+                return new_journal
 
         except Journal.DoesNotExist:
             raise ValidationError("対象の仕訳が存在しません。")
         except IntegrityError as e:
             # OneToOne制約違反が起きた場合
             raise ValidationError("この仕訳は既に修正・取消されています。")
-
-    # @staticmethod
-    # def get(journal_id):
-    #     try:
-    #         journal = Journal.objects.prefetch_related("lines").get(id=journal_id)
-    #     except Journal.DoesNotExist:
-    #         return Response(
-    #             {"detail": "Journal not found"}, status=status.HTTP_404_NOT_FOUND
-    #         )
-
-    #     serializer = JournalWithLinesOutputSerializer(journal)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     @staticmethod
     def list():
@@ -146,17 +130,17 @@ class JournalWithLinesService:
         journals = (
             Journal.objects.filter(type="NORMAL")
             .filter(~Exists(has_child))
+            .prefetch_related("lines")
             .order_by("-recorded_date", "-id")
         )
 
-        serializer = JournalWithLinesOutputSerializer(journals, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return journals
 
     @staticmethod
-    def history(current_journal_id: str):
+    def history(current_journal_id):
         """指定された仕訳の元仕訳を辿って履歴を全件取得する。"""
         ids = []
-        current_id = UUID(current_journal_id)
+        current_id = current_journal_id
 
         # 対象IDを取得
         while current_id:
@@ -177,5 +161,4 @@ class JournalWithLinesService:
         journal_map = {j.id: j for j in journals}
         ordered = [journal_map[i] for i in ids if i in journal_map][::-1]
 
-        serializer = JournalWithLinesOutputSerializer(ordered, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return ordered

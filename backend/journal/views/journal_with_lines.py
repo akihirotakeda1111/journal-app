@@ -1,39 +1,51 @@
 from rest_framework.views import APIView
-from ..serializers.journal_with_lines import JournalWithLinesInputSerializer
+from ..serializers.journal_with_lines import (
+    JournalWithLinesInputSerializer,
+    JournalWithLinesOutputSerializer,
+)
 from ..services.journal_with_lines import JournalWithLinesService
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class JournalWithLinesCreateAPIView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = JournalWithLinesInputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
+    def post(self, request):
+        input = JournalWithLinesInputSerializer(data=request.data)
+        input.is_valid(raise_exception=True)
 
-        return JournalWithLinesService.create(data)
+        journal = JournalWithLinesService.create(input.validated_data)
+
+        output = JournalWithLinesOutputSerializer(journal)
+        return Response(output.data, status=status.HTTP_201_CREATED)
 
 
 class JournalWithLinesReviseAPIView(APIView):
     def post(self, request, journal_id):
-        serializer = JournalWithLinesInputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        new_data = serializer.validated_data
+        input = JournalWithLinesInputSerializer(data=request.data)
+        input.is_valid(raise_exception=True)
 
-        return JournalWithLinesService.revise(journal_id, new_data)
+        journal = JournalWithLinesService.revise(journal_id, input.validated_data)
 
-
-class JournalWithLinesRetrieveAPIView(APIView):
-    def get(self, request, journal_id):
-        return JournalWithLinesService.get(journal_id)
+        output = JournalWithLinesOutputSerializer(journal)
+        return Response(output.data, status=status.HTTP_201_CREATED)
 
 
 class JournalWithLinesListAPIView(APIView):
     def get(self, request):
-        return JournalWithLinesService.list()
+        journals = JournalWithLinesService.list()
+
+        output = JournalWithLinesOutputSerializer(journals, many=True)
+
+        return Response(output.data, status=status.HTTP_200_OK)
 
 
 class JournalWithLinesHistoryAPIView(APIView):
-    def get(self, request, journal_id, *args, **kwargs):
-        return JournalWithLinesService.history(str(journal_id))
+    def get(self, request, journal_id):
+        journals = JournalWithLinesService.history(journal_id)
+
+        output = JournalWithLinesOutputSerializer(journals, many=True)
+
+        return Response(output.data, status=status.HTTP_200_OK)
 
         # if not history_journals:
         #     return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
