@@ -1,9 +1,9 @@
 from rest_framework.views import APIView
-from ..serializers.journal_with_lines import (
+from journal.serializers.journal_with_lines import (
     JournalWithLinesInputSerializer,
     JournalWithLinesOutputSerializer,
 )
-from ..services.journal_with_lines import JournalWithLinesService
+from journal.services.journal_with_lines import JournalWithLinesService
 from rest_framework.response import Response
 from rest_framework import status
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Journal
+from journal.models import Journal
 
 
 class JournalInputSerializer(serializers.Serializer):

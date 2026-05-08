@@ -1,6 +1,9 @@
 from rest_framework import serializers
-from .journal import JournalInputSerializer, JournalOutputSerializer
-from .journal_line import JournalLineInputSerializer, JournalLineOutputSerializer
+from journal.serializers.journal import JournalInputSerializer, JournalOutputSerializer
+from journal.serializers.journal_line import (
+    JournalLineInputSerializer,
+    JournalLineOutputSerializer,
+)
 
 
 class JournalWithLinesInputSerializer(JournalInputSerializer):

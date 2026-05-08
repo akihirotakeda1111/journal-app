@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from ..services.trial_balance import TrialBalanceService
+from journal.services.trial_balance import TrialBalanceService
 
 
 class TrialBalanceAPIView(APIView):

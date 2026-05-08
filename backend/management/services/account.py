@@ -1,4 +1,4 @@
-from ..models import Account
+from management.models import Account
 
 
 class AccountService:

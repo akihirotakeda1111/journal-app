@@ -1,6 +1,6 @@
 from rest_framework import generics
-from ..services.account import AccountService
-from ..serializers.account import AccountOutputSerializer
+from management.services.account import AccountService
+from management.serializers.account import AccountOutputSerializer
 from rest_framework.response import Response
 from rest_framework import status
 

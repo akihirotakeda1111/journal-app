@@ -1,8 +1,8 @@
 from django.db import transaction, IntegrityError
 from django.db.models import OuterRef, Exists
 from django.core.exceptions import ValidationError
-from ..models import Journal, JournalLine
-from ..exceptions.journal_exceptions import JournalAlreadyExistsError
+from journal.models import Journal, JournalLine
+from journal.exceptions.journal_exceptions import JournalAlreadyExistsError
 from uuid6 import uuid7
 
 
