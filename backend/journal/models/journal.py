@@ -1,4 +1,6 @@
 from django.db import models
+from datetime import datetime, date
+from uuid import UUID
 
 
 class Journal(models.Model):
@@ -32,6 +34,16 @@ class Journal(models.Model):
 
     # 作成日時
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def to_uuid(value):
+        return UUID(value) if isinstance(value, str) else value
+
+    @staticmethod
+    def to_date(value):
+        if isinstance(value, date):
+            return value
+        return datetime.strptime(value, "%Y-%m-%d").date()
 
     class Meta:
         constraints = [

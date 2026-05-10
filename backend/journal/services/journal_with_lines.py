@@ -9,8 +9,40 @@ from uuid6 import uuid7
 class JournalWithLinesService:
 
     @staticmethod
+    def _clean(data):
+        """共通の内部バリデーションと正規化処理"""
+
+        if "id" not in data:
+            raise ValidationError("id is required")
+        data["id"] = Journal.to_uuid(data["id"])
+
+        if "recorded_date" not in data:
+            raise ValidationError("recorded_date is required")
+        data["recorded_date"] = Journal.to_date(data["recorded_date"])
+
+        lines = data.get("lines")
+        if not lines:
+            raise ValidationError("lines must contain at least one item")
+
+        for idx, line in enumerate(lines):
+            if "account_id" not in line:
+                raise ValidationError(f"lines[{idx}].account_id is required")
+
+            if "amount" not in line:
+                raise ValidationError(f"lines[{idx}].amount is required")
+
+            if "side" not in line:
+                raise ValidationError(f"lines[{idx}].side is required")
+
+            if line["side"] not in ("DEBIT", "CREDIT"):
+                raise ValidationError(f"lines[{idx}].side must be DEBIT or CREDIT")
+
+        return data
+
+    @staticmethod
     @transaction.atomic
     def create(data):
+        data = JournalWithLinesService._clean(data)
         journal_id = data["id"]
 
         # すでに同じUUIDが存在する場合
@@ -58,6 +90,8 @@ class JournalWithLinesService:
     @transaction.atomic
     def revise(original_journal_id: str, new_journal_data: dict) -> Journal:
         """逆仕訳、訂正仕訳の作成"""
+        new_journal_data = JournalWithLinesService._clean(new_journal_data)
+
         try:
             with transaction.atomic():
                 # 元の仕訳を取得
@@ -131,7 +165,7 @@ class JournalWithLinesService:
             Journal.objects.filter(type="NORMAL")
             .filter(~Exists(has_child))
             .prefetch_related("lines")
-            .order_by("-recorded_date", "-id")
+            .order_by("-recorded_date", "-created_at")
         )
 
         return journals

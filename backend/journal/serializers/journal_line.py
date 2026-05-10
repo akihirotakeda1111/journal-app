@@ -4,7 +4,7 @@ from journal.models import JournalLine
 
 class JournalLineInputSerializer(serializers.Serializer):
     side = serializers.ChoiceField(choices=["DEBIT", "CREDIT"])
-    account_id = serializers.CharField(max_length=50)
+    account_id = serializers.CharField(max_length=10)
     amount = serializers.IntegerField(min_value=1)
 
 

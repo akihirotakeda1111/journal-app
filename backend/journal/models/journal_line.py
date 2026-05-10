@@ -9,7 +9,7 @@ class JournalLine(models.Model):
     # 仕訳ヘッダー
     journal = models.ForeignKey(
         "Journal",
-        on_delete=models.CASCADE,  # 親が消えたら明細も消える
+        on_delete=models.CASCADE,
         related_name="lines",
         db_index=True,
     )
