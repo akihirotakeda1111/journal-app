@@ -4,10 +4,13 @@ from journal.serializers.journal_line import (
     JournalLineInputSerializer,
     JournalLineOutputSerializer,
 )
+from journal.domain.constants import JournalLineRules
 
 
 class JournalWithLinesInputSerializer(JournalInputSerializer):
-    lines = JournalLineInputSerializer(many=True, allow_empty=False, max_length=100)
+    lines = JournalLineInputSerializer(
+        many=True, allow_empty=False, max_length=JournalLineRules.MAX_ROW
+    )
 
     def validate(self, data):
         """貸借合計の完全一致を検証"""

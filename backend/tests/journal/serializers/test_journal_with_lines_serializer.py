@@ -4,6 +4,7 @@ from journal.serializers.journal_with_lines import (
     JournalWithLinesInputSerializer,
     JournalWithLinesOutputSerializer,
 )
+from journal.domain.constants import JournalLineRules
 from uuid import UUID
 from datetime import date
 
@@ -27,6 +28,25 @@ def test_journal_with_lines_input_serializer_valid(setup_accounts):
     validated = serializer.validated_data
     assert "lines" in validated
     assert len(validated["lines"]) == 2
+
+
+def test_journal_with_lines_input_serializer_valid_max_length(setup_accounts):
+    """lines が最大行数までバリデーションが通ること"""
+
+    asset, liability, expense, revenue = setup_accounts
+    payload = {
+        "id": "11111111-1111-1111-1111-111111111111",
+        "recorded_date": "2026-01-01",
+        "lines": [
+            {"account_id": asset.id, "side": "DEBIT", "amount": i}
+            for i in range(JournalLineRules.MAX_ROW)
+        ],
+    }
+
+    serializer = JournalWithLinesInputSerializer(data=payload)
+
+    assert not serializer.is_valid()
+    assert "lines" in serializer.errors
 
 
 def test_journal_with_lines_input_serializer_invalid_unbalanced(setup_accounts):
@@ -71,7 +91,8 @@ def test_journal_with_lines_input_serializer_max_length(setup_accounts):
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": asset.id, "side": "DEBIT", "amount": i} for i in range(101)
+            {"account_id": asset.id, "side": "DEBIT", "amount": i}
+            for i in range(JournalLineRules.MAX_ROW + 1)
         ],
     }
 

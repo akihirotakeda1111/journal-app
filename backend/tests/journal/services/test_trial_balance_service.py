@@ -2,6 +2,7 @@ import pytest
 from management.models import Account
 from journal.models import Journal, JournalLine
 from journal.services.trial_balance import TrialBalanceService
+from journal.domain.constants import AmountRules
 from datetime import date, timedelta
 from uuid import UUID
 
@@ -160,3 +161,42 @@ def test_trial_balance_get_ordered(db, setup_accounts):
     # Account.objects.order_by('id') と同じ順序で返っていること
     expected_ids = list(Account.objects.order_by("id").values_list("id", flat=True))
     assert ids == list(expected_ids)
+
+
+def test_trial_balance_get_max_amount_record(db, setup_accounts):
+    """金額の最大値を最大レコード投入しても正しく集計されること"""
+
+    asset, liability, expense, revenue = setup_accounts
+
+    MAX_AMOUNT = AmountRules.MAX
+    RECORD_COUNT = 100
+
+    # Journal を大量生成
+    for i in range(RECORD_COUNT):
+        j = Journal.objects.create(
+            id=UUID(f"aaaaaaaa-aaaa-aaaa-aaaa-{i:012d}"),
+            recorded_date=date(2026, 1, 1),
+            description=f"max test {i}",
+            type="NORMAL",
+        )
+        # asset に借方（正）
+        JournalLine.objects.create(journal=j, account=asset, amount=MAX_AMOUNT)
+        # liability に貸方（負）
+        JournalLine.objects.create(journal=j, account=liability, amount=-MAX_AMOUNT)
+
+    # 集計実行
+    tb = TrialBalanceService.get(None, None)
+    tb_map = {row["account_id"]: row for row in tb}
+
+    # 期待値：MAX_AMOUNT × RECORD_COUNT
+    expected_total = MAX_AMOUNT * RECORD_COUNT
+
+    # ASSET → 借方（正）
+    asset_row = tb_map[asset.id]
+    assert asset_row["balance"] == expected_total
+    assert asset_row["side"] == "DEBIT"
+
+    # LIABILITY → 貸方（負）
+    liability_row = tb_map[liability.id]
+    assert liability_row["balance"] == expected_total
+    assert liability_row["side"] == "CREDIT"
