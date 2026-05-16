@@ -2,6 +2,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from journal.services.journal_with_lines import JournalWithLinesService
 from journal.models import Journal, JournalLine
+from journal.domain.constants import AmountRules
 from journal.exceptions.journal_exceptions import JournalAlreadyExistsError
 from uuid import UUID
 from datetime import date, datetime, timedelta
@@ -15,8 +16,10 @@ def test_clean_success():
         "id": id_str,
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": 1, "amount": 1000, "side": "DEBIT"},
-            {"account_id": 2, "amount": 1000, "side": "CREDIT"},
+            {"account_id": 1, "amount": AmountRules.MIN, "side": "DEBIT"},
+            {"account_id": 2, "amount": AmountRules.MIN, "side": "CREDIT"},
+            {"account_id": 1, "amount": AmountRules.MAX, "side": "DEBIT"},
+            {"account_id": 2, "amount": AmountRules.MAX, "side": "CREDIT"},
         ],
     }
 

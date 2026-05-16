@@ -1,11 +1,15 @@
 from rest_framework import serializers
 from journal.models import JournalLine
+from journal.domain.constants import AmountRules
 
 
 class JournalLineInputSerializer(serializers.Serializer):
     side = serializers.ChoiceField(choices=["DEBIT", "CREDIT"])
     account_id = serializers.CharField(max_length=10)
-    amount = serializers.IntegerField(min_value=1)
+    amount = serializers.IntegerField(
+        min_value=AmountRules.MIN,
+        max_value=AmountRules.MAX,
+    )
 
 
 class JournalLineOutputSerializer(serializers.ModelSerializer):

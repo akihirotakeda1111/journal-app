@@ -2,6 +2,7 @@ from django.db import transaction, IntegrityError
 from django.db.models import OuterRef, Exists
 from django.core.exceptions import ValidationError
 from journal.models import Journal, JournalLine
+from journal.domain.constants import AmountRules
 from journal.exceptions.journal_exceptions import JournalAlreadyExistsError
 from uuid6 import uuid7
 
@@ -30,6 +31,11 @@ class JournalWithLinesService:
 
             if "amount" not in line:
                 raise ValidationError(f"lines[{idx}].amount is required")
+            else:
+                if not (AmountRules.MIN <= line["amount"] <= AmountRules.MAX):
+                    raise ValidationError(
+                        f"lines[{idx}].amount must be between {AmountRules.MIN} and {AmountRules.MAX}"
+                    )
 
             if "side" not in line:
                 raise ValidationError(f"lines[{idx}].side is required")

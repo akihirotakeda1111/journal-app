@@ -4,14 +4,16 @@ from journal.serializers.journal_line import (
     JournalLineOutputSerializer,
 )
 from journal.models import Journal, JournalLine
+from journal.domain.constants import AmountRules
 from uuid import UUID
 from datetime import date
 
 
-def test_journal_line_input_serializer_valid():
+@pytest.mark.parametrize("valid_amount", [AmountRules.MIN, AmountRules.MAX])
+def test_journal_line_input_serializer_valid(valid_amount):
     """正常にバリデーションが通ること"""
 
-    payload = {"side": "DEBIT", "account_id": "T01", "amount": 1}
+    payload = {"side": "DEBIT", "account_id": "T01", "amount": valid_amount}
 
     serializer = JournalLineInputSerializer(data=payload)
     assert serializer.is_valid(), serializer.errors
@@ -19,7 +21,7 @@ def test_journal_line_input_serializer_valid():
     validated = serializer.validated_data
     assert validated["side"] == "DEBIT"
     assert validated["account_id"] == "T01"
-    assert validated["amount"] == 1
+    assert validated["amount"] == valid_amount
 
 
 @pytest.mark.parametrize("invalid_side", ["INVALID", "", None])
@@ -35,8 +37,20 @@ def test_journal_line_input_serializer_invalid_side(invalid_side):
 
 
 @pytest.mark.parametrize("invalid_amount", [0, -1, None])
-def test_journal_line_input_serializer_invalid_amount(invalid_amount):
+def test_journal_line_input_serializer_invalid_amount_min(invalid_amount):
     """amount は 1 未満の場合、バリデーションエラーになること"""
+
+    payload = {"side": "DEBIT", "account_id": "T01", "amount": invalid_amount}
+
+    serializer = JournalLineInputSerializer(data=payload)
+
+    assert not serializer.is_valid()
+    assert "amount" in serializer.errors
+
+
+@pytest.mark.parametrize("invalid_amount", [AmountRules.MAX + 1, -AmountRules.MAX - 1])
+def test_journal_line_input_serializer_invalid_amount_max(invalid_amount):
+    """amount は 13 桁以上の場合、バリデーションエラーになること"""
 
     payload = {"side": "DEBIT", "account_id": "T01", "amount": invalid_amount}
 
