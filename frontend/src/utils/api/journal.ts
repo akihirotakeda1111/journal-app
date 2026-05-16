@@ -1,6 +1,6 @@
 import { apiClient } from "./client";
-import { JournalWithLinesFormSchema, JournalWithLinesApiSchema } from "../../journal/schemas/journalWithLines";
-import type { JournalWithLinesForm, JournalWithLinesApi } from "../../journal/types/journalWithLines";
+import { JournalWithLinesFormSchema, JournalWithLinesApiSchema } from "@/journal/schemas/journalWithLines";
+import type { JournalWithLinesForm, JournalWithLinesApi } from "@/journal/types/journalWithLines";
 
 export async function createJournal(data: JournalWithLinesForm): Promise<JournalWithLinesForm> {
   const validated = JournalWithLinesFormSchema.parse(data);
