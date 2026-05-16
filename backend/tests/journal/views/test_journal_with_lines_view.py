@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import patch
 from rest_framework import status
 from uuid import UUID
+from journal.domain.constants import Side
 
 BASE_CREATE = "/api/journal/"
 BASE_REVISE = "/api/journal/revise/{journal_id}/"
@@ -36,8 +37,8 @@ def test_journal_with_lines_view_create(client):
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": "A01", "side": "DEBIT", "amount": 100},
-            {"account_id": "A02", "side": "CREDIT", "amount": 100},
+            {"account_id": "A01", "side": Side.DEBIT, "amount": 100},
+            {"account_id": "A02", "side": Side.CREDIT, "amount": 100},
         ],
     }
 
@@ -45,8 +46,8 @@ def test_journal_with_lines_view_create(client):
         "id": payload["id"],
         "recordedDate": payload["recorded_date"],
         "lines": [
-            {"accountId": "T01", "side": "DEBIT", "amount": 100},
-            {"accountId": "T02", "side": "CREDIT", "amount": 100},
+            {"accountId": "T01", "side": Side.DEBIT, "amount": 100},
+            {"accountId": "T02", "side": Side.CREDIT, "amount": 100},
         ],
     }
 
@@ -73,8 +74,8 @@ def test_journal_with_lines_view_revise(client):
     payload = {
         "recorded_date": "2026-01-02",
         "lines": [
-            {"account_id": "T01", "side": "DEBIT", "amount": 200},
-            {"account_id": "T03", "side": "CREDIT", "amount": 200},
+            {"account_id": "T01", "side": Side.DEBIT, "amount": 200},
+            {"account_id": "T03", "side": Side.CREDIT, "amount": 200},
         ],
     }
 
@@ -82,8 +83,8 @@ def test_journal_with_lines_view_revise(client):
         "id": journal_id_str,
         "recordedDate": payload["recorded_date"],
         "lines": [
-            {"accountId": "T01", "side": "DEBIT", "amount": 200},
-            {"accountId": "T03", "side": "CREDIT", "amount": 200},
+            {"accountId": "T01", "side": Side.DEBIT, "amount": 200},
+            {"accountId": "T03", "side": Side.CREDIT, "amount": 200},
         ],
     }
 

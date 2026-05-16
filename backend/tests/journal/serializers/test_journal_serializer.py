@@ -1,6 +1,7 @@
 import pytest
 from journal.models import Journal
 from journal.serializers.journal import JournalInputSerializer, JournalOutputSerializer
+from journal.domain.constants import JournalType
 from datetime import date
 
 
@@ -68,7 +69,7 @@ def test_journal_output_serializer(db):
         id="11111111-1111-1111-1111-111111111111",
         recorded_date=date(2026, 1, 1),
         description="Test",
-        type="NORMAL",
+        type=JournalType.NORMAL,
     )
 
     serializer = JournalOutputSerializer(journal)
@@ -76,5 +77,5 @@ def test_journal_output_serializer(db):
     assert data["id"] == str(journal.id)
     assert data["recorded_date"] == "2026-01-01"
     assert data["description"] == "Test"
-    assert data["type"] == "NORMAL"
+    assert data["type"] == JournalType.NORMAL
     assert set(data.keys()) == {"id", "recorded_date", "description", "type"}

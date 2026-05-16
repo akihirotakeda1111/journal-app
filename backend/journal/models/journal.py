@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import datetime, date
 from uuid import UUID
+from journal.domain.constants import JournalType
 
 
 class Journal(models.Model):
@@ -16,11 +17,8 @@ class Journal(models.Model):
     # 状態
     type = models.CharField(
         max_length=10,
-        choices=(
-            ("NORMAL", "通常"),
-            ("CANCEL", "取消"),
-        ),
-        default="NORMAL",
+        choices=JournalType.CHOICES,
+        default=JournalType.NORMAL,
     )
 
     # 元仕訳
@@ -48,7 +46,7 @@ class Journal(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(type__in=["NORMAL", "CANCEL"]),
+                condition=models.Q(type__in=[JournalType.NORMAL, JournalType.CANCEL]),
                 name="chk_journals_type",
             )
         ]

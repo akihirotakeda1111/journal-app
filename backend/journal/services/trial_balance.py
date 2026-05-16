@@ -1,6 +1,8 @@
 from django.db.models import Sum, Q, Value, IntegerField
 from django.db.models.functions import Coalesce
 from management.models import Account
+from journal.domain.constants import Side
+from management.domain.constants import AccountType
 
 
 class TrialBalanceService:
@@ -31,17 +33,17 @@ class TrialBalanceService:
             net_total = account.net_total
 
             # 貸借の判定
-            if acc_type in ["ASSET", "EXPENSE"]:
+            if acc_type in [AccountType.ASSET, AccountType.EXPENSE]:
                 balance = net_total
-                normal_side = "DEBIT"
+                normal_side = Side.DEBIT
             else:
                 balance = -net_total
-                normal_side = "CREDIT"
+                normal_side = Side.CREDIT
 
             actual_side = (
                 normal_side
                 if balance >= 0
-                else ("CREDIT" if normal_side == "DEBIT" else "DEBIT")
+                else (Side.CREDIT if normal_side == Side.DEBIT else Side.DEBIT)
             )
 
             trial_balance.append(

@@ -4,7 +4,7 @@ from journal.serializers.journal_with_lines import (
     JournalWithLinesInputSerializer,
     JournalWithLinesOutputSerializer,
 )
-from journal.domain.constants import JournalLineRules
+from journal.domain.constants import JournalLineRules, JournalType, Side
 from uuid import UUID
 from datetime import date
 
@@ -17,8 +17,8 @@ def test_journal_with_lines_input_serializer_valid(setup_accounts):
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": asset.id, "amount": 100, "side": "DEBIT"},
-            {"account_id": liability.id, "amount": 100, "side": "CREDIT"},
+            {"account_id": asset.id, "amount": 100, "side": Side.DEBIT},
+            {"account_id": liability.id, "amount": 100, "side": Side.CREDIT},
         ],
     }
 
@@ -38,7 +38,7 @@ def test_journal_with_lines_input_serializer_valid_max_length(setup_accounts):
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": asset.id, "side": "DEBIT", "amount": i}
+            {"account_id": asset.id, "side": Side.DEBIT, "amount": i}
             for i in range(JournalLineRules.MAX_ROW)
         ],
     }
@@ -57,8 +57,8 @@ def test_journal_with_lines_input_serializer_invalid_unbalanced(setup_accounts):
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": asset.id, "amount": 100, "side": "DEBIT"},
-            {"account_id": liability.id, "amount": 50, "side": "CREDIT"},
+            {"account_id": asset.id, "amount": 100, "side": Side.DEBIT},
+            {"account_id": liability.id, "amount": 50, "side": Side.CREDIT},
         ],
     }
 
@@ -91,7 +91,7 @@ def test_journal_with_lines_input_serializer_max_length(setup_accounts):
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": asset.id, "side": "DEBIT", "amount": i}
+            {"account_id": asset.id, "side": Side.DEBIT, "amount": i}
             for i in range(JournalLineRules.MAX_ROW + 1)
         ],
     }
@@ -110,7 +110,7 @@ def test_journal_with_lines_output_serializer_value(db, setup_accounts):
         id=UUID("11111111-1111-1111-1111-111111111111"),
         recorded_date=date(2026, 1, 1),
         description="test",
-        type="NORMAL",
+        type=JournalType.NORMAL,
     )
 
     journal1 = JournalLine.objects.create(
@@ -127,7 +127,7 @@ def test_journal_with_lines_output_serializer_value(db, setup_accounts):
     assert data["id"] == str(journal.id)
     assert data["recorded_date"] == "2026-01-01"
     assert data["description"] == "test"
-    assert data["type"] == "NORMAL"
+    assert data["type"] == JournalType.NORMAL
 
     # 仕訳明細 が含まれていること
     assert "lines" in data
@@ -137,13 +137,13 @@ def test_journal_with_lines_output_serializer_value(db, setup_accounts):
     # 借方（正の値）は DEBIT、amount は絶対値
     line0 = data["lines"][0]
     assert line0["account_id"] == asset.id
-    assert line0["side"] == "DEBIT"
+    assert line0["side"] == Side.DEBIT
     assert line0["amount"] == 200
 
     # 貸方（負の値）は CREDIT、amount は絶対値
     line1 = data["lines"][1]
     assert line1["account_id"] == liability.id
-    assert line1["side"] == "CREDIT"
+    assert line1["side"] == Side.CREDIT
     assert line1["amount"] == 200
 
 

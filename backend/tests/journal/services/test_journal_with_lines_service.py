@@ -2,7 +2,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from journal.services.journal_with_lines import JournalWithLinesService
 from journal.models import Journal, JournalLine
-from journal.domain.constants import AmountRules
+from journal.domain.constants import AmountRules, JournalType, Side
 from journal.exceptions.journal_exceptions import JournalAlreadyExistsError
 from uuid import UUID
 from datetime import date, datetime, timedelta
@@ -16,10 +16,10 @@ def test_clean_success():
         "id": id_str,
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": 1, "amount": AmountRules.MIN, "side": "DEBIT"},
-            {"account_id": 2, "amount": AmountRules.MIN, "side": "CREDIT"},
-            {"account_id": 1, "amount": AmountRules.MAX, "side": "DEBIT"},
-            {"account_id": 2, "amount": AmountRules.MAX, "side": "CREDIT"},
+            {"account_id": 1, "amount": AmountRules.MIN, "side": Side.DEBIT},
+            {"account_id": 2, "amount": AmountRules.MIN, "side": Side.CREDIT},
+            {"account_id": 1, "amount": AmountRules.MAX, "side": Side.DEBIT},
+            {"account_id": 2, "amount": AmountRules.MAX, "side": Side.CREDIT},
         ],
     }
 
@@ -36,8 +36,8 @@ def test_clean_missing_id():
     data = {
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": 1, "amount": 100, "side": "DEBIT"},
-            {"account_id": 2, "amount": 100, "side": "CREDIT"},
+            {"account_id": 1, "amount": 100, "side": Side.DEBIT},
+            {"account_id": 2, "amount": 100, "side": Side.CREDIT},
         ],
     }
     with pytest.raises(ValidationError):
@@ -49,8 +49,8 @@ def test_clean_missing_recorded_date():
     data = {
         "id": "11111111-1111-1111-1111-111111111111",
         "lines": [
-            {"account_id": 1, "amount": 100, "side": "DEBIT"},
-            {"account_id": 2, "amount": 100, "side": "CREDIT"},
+            {"account_id": 1, "amount": 100, "side": Side.DEBIT},
+            {"account_id": 2, "amount": 100, "side": Side.CREDIT},
         ],
     }
     with pytest.raises(ValidationError):
@@ -74,8 +74,8 @@ def test_clean_missing_account_id():
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": 1, "amount": 100, "side": "DEBIT"},
-            {"amount": 100, "side": "CREDIT"},
+            {"account_id": 1, "amount": 100, "side": Side.DEBIT},
+            {"amount": 100, "side": Side.CREDIT},
         ],
     }
     with pytest.raises(ValidationError):
@@ -88,8 +88,8 @@ def test_clean_missing_amount():
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": 1, "amount": 100, "side": "DEBIT"},
-            {"account_id": 2, "side": "CREDIT"},
+            {"account_id": 1, "amount": 100, "side": Side.DEBIT},
+            {"account_id": 2, "side": Side.CREDIT},
         ],
     }
     with pytest.raises(ValidationError):
@@ -102,7 +102,7 @@ def test_clean_invalid_side():
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": 1, "amount": 100, "side": "CREDIT"},
+            {"account_id": 1, "amount": 100, "side": Side.CREDIT},
             {"account_id": 2, "amount": 100, "side": "INVALID"},
         ],
     }
@@ -119,8 +119,8 @@ def test_create_success(db, setup_accounts):
         "recorded_date": "2026-01-01",
         "description": "テスト仕訳",
         "lines": [
-            {"account_id": asset.id, "amount": 1000, "side": "DEBIT"},
-            {"account_id": liability.id, "amount": 1000, "side": "CREDIT"},
+            {"account_id": asset.id, "amount": 1000, "side": Side.DEBIT},
+            {"account_id": liability.id, "amount": 1000, "side": Side.CREDIT},
         ],
     }
     journal = JournalWithLinesService.create(data)
@@ -134,7 +134,7 @@ def test_create_success(db, setup_accounts):
     assert journal.id == Journal.to_uuid(data["id"])
     assert journal.recorded_date == Journal.to_date(data["recorded_date"])
     assert journal.description == data["description"]
-    assert journal.type == "NORMAL"
+    assert journal.type == JournalType.NORMAL
     assert journal.original_journal is None
 
     # 仕訳明細が正しく保存されていること
@@ -164,8 +164,8 @@ def test_create_duplicate_id(db, setup_accounts):
         "id": "22222222-2222-2222-2222-222222222222",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": asset.id, "amount": 100, "side": "DEBIT"},
-            {"account_id": liability.id, "amount": 100, "side": "CREDIT"},
+            {"account_id": asset.id, "amount": 100, "side": Side.DEBIT},
+            {"account_id": liability.id, "amount": 100, "side": Side.CREDIT},
         ],
     }
 
@@ -189,8 +189,8 @@ def test_revise_success(db, setup_accounts):
             "recorded_date": "2026-01-01",
             "description": "元仕訳",
             "lines": [
-                {"account_id": asset.id, "amount": 500, "side": "DEBIT"},
-                {"account_id": liability.id, "amount": 500, "side": "CREDIT"},
+                {"account_id": asset.id, "amount": 500, "side": Side.DEBIT},
+                {"account_id": liability.id, "amount": 500, "side": Side.CREDIT},
             ],
         }
     )
@@ -202,13 +202,13 @@ def test_revise_success(db, setup_accounts):
         "recorded_date": "2026-01-02",
         "description": "訂正仕訳",
         "lines": [
-            {"account_id": asset.id, "amount": 300, "side": "DEBIT"},
-            {"account_id": liability.id, "amount": 300, "side": "CREDIT"},
+            {"account_id": asset.id, "amount": 300, "side": Side.DEBIT},
+            {"account_id": liability.id, "amount": 300, "side": Side.CREDIT},
         ],
     }
     new_journal = JournalWithLinesService.revise(original.id, new_data)
     new_journal_lines = list(JournalLine.objects.filter(journal=new_journal))
-    cancel = Journal.objects.get(type="CANCEL")
+    cancel = Journal.objects.get(type=JournalType.CANCEL)
     cancel_lines = list(JournalLine.objects.filter(journal=cancel))
 
     # 元仕訳、逆仕訳、訂正仕訳の3つが存在すること
@@ -218,7 +218,7 @@ def test_revise_success(db, setup_accounts):
     assert len(original_lines) == len(cancel_lines)
 
     # 逆仕訳が正しく保存されていること
-    assert cancel.type == "CANCEL"
+    assert cancel.type == JournalType.CANCEL
     assert cancel.recorded_date == original.recorded_date
     assert cancel.description == f"【取消】 {original.description}"
 
@@ -238,7 +238,7 @@ def test_revise_success(db, setup_accounts):
     assert len(new_journal_lines) == 2
 
     # 訂正仕訳が正しく保存されていること
-    assert new_journal.type == "NORMAL"
+    assert new_journal.type == JournalType.NORMAL
     assert new_journal.recorded_date == new_data["recorded_date"]
     assert new_journal.description == new_data["description"]
 
@@ -262,7 +262,7 @@ def test_revise_clean_validation(db, setup_accounts):
         {
             "id": "11111111-1111-1111-1111-111111111111",
             "recorded_date": "2026-01-01",
-            "lines": [{"account_id": asset.id, "amount": 100, "side": "DEBIT"}],
+            "lines": [{"account_id": asset.id, "amount": 100, "side": Side.DEBIT}],
         }
     )
     new_data = {
@@ -291,8 +291,8 @@ def test_revise_double_revise(db, setup_accounts):
             "id": "55555555-5555-5555-5555-555555555555",
             "recorded_date": "2026-01-01",
             "lines": [
-                {"account_id": asset.id, "amount": 100, "side": "DEBIT"},
-                {"account_id": liability.id, "amount": 100, "side": "CREDIT"},
+                {"account_id": asset.id, "amount": 100, "side": Side.DEBIT},
+                {"account_id": liability.id, "amount": 100, "side": Side.CREDIT},
             ],
         }
     )
@@ -301,8 +301,8 @@ def test_revise_double_revise(db, setup_accounts):
         "id": "66666666-6666-6666-6666-666666666666",
         "recorded_date": "2026-01-02",
         "lines": [
-            {"account_id": asset.id, "amount": 200, "side": "DEBIT"},
-            {"account_id": liability.id, "amount": 200, "side": "CREDIT"},
+            {"account_id": asset.id, "amount": 200, "side": Side.DEBIT},
+            {"account_id": liability.id, "amount": 200, "side": Side.CREDIT},
         ],
     }
 
@@ -334,8 +334,8 @@ def test_list(db, setup_accounts):
             "recorded_date": "2026-01-03",
             "description": "old_same_day",
             "lines": [
-                {"account_id": asset.id, "amount": 100, "side": "DEBIT"},
-                {"account_id": liability.id, "amount": 100, "side": "CREDIT"},
+                {"account_id": asset.id, "amount": 100, "side": Side.DEBIT},
+                {"account_id": liability.id, "amount": 100, "side": Side.CREDIT},
             ],
         }
     )
@@ -346,8 +346,8 @@ def test_list(db, setup_accounts):
             "recorded_date": "2026-01-03",
             "description": "early_same_day",
             "lines": [
-                {"account_id": asset.id, "amount": 200, "side": "DEBIT"},
-                {"account_id": liability.id, "amount": 200, "side": "CREDIT"},
+                {"account_id": asset.id, "amount": 200, "side": Side.DEBIT},
+                {"account_id": liability.id, "amount": 200, "side": Side.CREDIT},
             ],
         }
     )
@@ -358,8 +358,8 @@ def test_list(db, setup_accounts):
             "recorded_date": "2026-01-04",
             "description": "later_date",
             "lines": [
-                {"account_id": asset.id, "amount": 300, "side": "DEBIT"},
-                {"account_id": liability.id, "amount": 300, "side": "CREDIT"},
+                {"account_id": asset.id, "amount": 300, "side": Side.DEBIT},
+                {"account_id": liability.id, "amount": 300, "side": Side.CREDIT},
             ],
         }
     )
@@ -393,8 +393,8 @@ def test_history(db, setup_accounts):
             "recorded_date": "2026-01-01",
             "description": "first",
             "lines": [
-                {"account_id": asset.id, "amount": 500, "side": "DEBIT"},
-                {"account_id": liability.id, "amount": 500, "side": "CREDIT"},
+                {"account_id": asset.id, "amount": 500, "side": Side.DEBIT},
+                {"account_id": liability.id, "amount": 500, "side": Side.CREDIT},
             ],
         }
     )
@@ -407,8 +407,8 @@ def test_history(db, setup_accounts):
             "recorded_date": "2026-01-02",
             "description": "new1",
             "lines": [
-                {"account_id": asset.id, "amount": 400, "side": "DEBIT"},
-                {"account_id": liability.id, "amount": 400, "side": "CREDIT"},
+                {"account_id": asset.id, "amount": 400, "side": Side.DEBIT},
+                {"account_id": liability.id, "amount": 400, "side": Side.CREDIT},
             ],
         },
     )
@@ -421,8 +421,8 @@ def test_history(db, setup_accounts):
             "recorded_date": "2026-01-03",
             "description": "new2",
             "lines": [
-                {"account_id": asset.id, "amount": 300, "side": "DEBIT"},
-                {"account_id": liability.id, "amount": 300, "side": "CREDIT"},
+                {"account_id": asset.id, "amount": 300, "side": Side.DEBIT},
+                {"account_id": liability.id, "amount": 300, "side": Side.CREDIT},
             ],
         },
     )

@@ -2,7 +2,8 @@ import pytest
 from management.models import Account
 from journal.models import Journal, JournalLine
 from journal.services.trial_balance import TrialBalanceService
-from journal.domain.constants import AmountRules
+from journal.domain.constants import AmountRules, JournalType, Side
+from management.domain.constants import AccountType
 from datetime import date, timedelta
 from uuid import UUID
 
@@ -20,7 +21,7 @@ def test_trial_balance_get(db, setup_accounts):
         id=UUID("11111111-1111-1111-1111-111111111111"),
         recorded_date=base_date,
         description="",
-        type="NORMAL",
+        type=JournalType.NORMAL,
     )
     # journal1: asset に借方 1000, liability に貸方 -1000
     JournalLine.objects.create(journal=journal1, account=asset, amount=1000)
@@ -31,7 +32,7 @@ def test_trial_balance_get(db, setup_accounts):
         id=UUID("22222222-2222-2222-2222-222222222222"),
         recorded_date=base_date,
         description="",
-        type="NORMAL",
+        type=JournalType.NORMAL,
     )
     JournalLine.objects.create(journal=journal2, account=expense, amount=300)
     JournalLine.objects.create(journal=journal2, account=revenue, amount=-300)
@@ -41,7 +42,7 @@ def test_trial_balance_get(db, setup_accounts):
         id=UUID("33333333-3333-3333-3333-333333333333"),
         recorded_date=base_date,
         description="",
-        type="NORMAL",
+        type=JournalType.NORMAL,
     )
     JournalLine.objects.create(journal=journal3, account=asset, amount=-200)
     JournalLine.objects.create(journal=journal3, account=liability, amount=200)
@@ -53,22 +54,22 @@ def test_trial_balance_get(db, setup_accounts):
     # ASSET: 1000 + (-200) = 800 -> DEBIT
     asset_row = tb_map[asset.id]
     assert asset_row["balance"] == 800
-    assert asset_row["side"] == "DEBIT"
+    assert asset_row["side"] == Side.DEBIT
 
     # LIABILITY: -1000 + 200 = -800 -> CREDIT
     liability_row = tb_map[liability.id]
     assert liability_row["balance"] == 800
-    assert liability_row["side"] == "CREDIT"
+    assert liability_row["side"] == Side.CREDIT
 
     # EXPENSE: 300 -> DEBIT
     expense_row = tb_map[expense.id]
     assert expense_row["balance"] == 300
-    assert expense_row["side"] == "DEBIT"
+    assert expense_row["side"] == Side.DEBIT
 
     # REVENUE: -300 -> CREDIT
     revenue_row = tb_map[revenue.id]
     assert revenue_row["balance"] == 300
-    assert revenue_row["side"] == "CREDIT"
+    assert revenue_row["side"] == Side.CREDIT
 
 
 def test_trial_balance_get_with_date_range(db, setup_accounts):
@@ -83,7 +84,7 @@ def test_trial_balance_get_with_date_range(db, setup_accounts):
         id=UUID("11111111-1111-1111-1111-111111111111"),
         recorded_date=start_date - timedelta(days=1),
         description="",
-        type="NORMAL",
+        type=JournalType.NORMAL,
     )
     JournalLine.objects.create(journal=journal1, account=asset, amount=500)
     JournalLine.objects.create(journal=journal1, account=liability, amount=-500)
@@ -93,7 +94,7 @@ def test_trial_balance_get_with_date_range(db, setup_accounts):
         id=UUID("22222222-2222-2222-2222-222222222222"),
         recorded_date=start_date,
         description="",
-        type="NORMAL",
+        type=JournalType.NORMAL,
     )
     JournalLine.objects.create(journal=journal2, account=asset, amount=300)
     JournalLine.objects.create(journal=journal2, account=liability, amount=-300)
@@ -103,7 +104,7 @@ def test_trial_balance_get_with_date_range(db, setup_accounts):
         id=UUID("33333333-3333-3333-3333-333333333333"),
         recorded_date=end_date,
         description="",
-        type="NORMAL",
+        type=JournalType.NORMAL,
     )
     JournalLine.objects.create(journal=journal3, account=asset, amount=700)
     JournalLine.objects.create(journal=journal3, account=liability, amount=-700)
@@ -113,7 +114,7 @@ def test_trial_balance_get_with_date_range(db, setup_accounts):
         id=UUID("44444444-4444-4444-4444-444444444444"),
         recorded_date=end_date + timedelta(days=1),
         description="",
-        type="NORMAL",
+        type=JournalType.NORMAL,
     )
     JournalLine.objects.create(journal=journal4, account=expense, amount=900)
     JournalLine.objects.create(journal=journal4, account=revenue, amount=-900)
@@ -124,15 +125,15 @@ def test_trial_balance_get_with_date_range(db, setup_accounts):
 
     # 期間内合計 300 + 700 = 1000 -> balance 1000, side DEBIT
     assert tb_map[asset.id]["balance"] == 1000
-    assert tb_map[asset.id]["side"] == "DEBIT"
+    assert tb_map[asset.id]["side"] == Side.DEBIT
 
     # 期間内合計 -300 + (-700) = -1000 -> balance 1000, side CREDIT
     assert tb_map[liability.id]["balance"] == 1000
-    assert tb_map[liability.id]["side"] == "CREDIT"
+    assert tb_map[liability.id]["side"] == Side.CREDIT
 
     # 期間内の仕訳がない場合は balance 0, side DEBIT（デフォルト）
     assert tb_map[expense.id]["balance"] == 0
-    assert tb_map[expense.id]["side"] == "DEBIT"
+    assert tb_map[expense.id]["side"] == Side.DEBIT
 
 
 def test_trial_balance_get_ordered(db, setup_accounts):
@@ -146,13 +147,17 @@ def test_trial_balance_get_ordered(db, setup_accounts):
             id=UUID(f"11111111-1111-1111-1111-{i:012d}"),
             recorded_date=date(2026, 1, 10 + i),
             description="Test",
-            type="NORMAL",
+            type=JournalType.NORMAL,
         )
         amt = 100 * (i + 1)
         JournalLine.objects.create(
             journal=j,
             account=acc,
-            amount=amt if acc.type == "ASSET" or acc.type == "EXPENSE" else -amt,
+            amount=(
+                amt
+                if acc.type == AccountType.ASSET or acc.type == AccountType.EXPENSE
+                else -amt
+            ),
         )
 
     tb = TrialBalanceService.get(None, None)
@@ -177,7 +182,7 @@ def test_trial_balance_get_max_amount_record(db, setup_accounts):
             id=UUID(f"aaaaaaaa-aaaa-aaaa-aaaa-{i:012d}"),
             recorded_date=date(2026, 1, 1),
             description=f"max test {i}",
-            type="NORMAL",
+            type=JournalType.NORMAL,
         )
         # asset に借方（正）
         JournalLine.objects.create(journal=j, account=asset, amount=MAX_AMOUNT)
@@ -194,9 +199,9 @@ def test_trial_balance_get_max_amount_record(db, setup_accounts):
     # ASSET → 借方（正）
     asset_row = tb_map[asset.id]
     assert asset_row["balance"] == expected_total
-    assert asset_row["side"] == "DEBIT"
+    assert asset_row["side"] == Side.DEBIT
 
     # LIABILITY → 貸方（負）
     liability_row = tb_map[liability.id]
     assert liability_row["balance"] == expected_total
-    assert liability_row["side"] == "CREDIT"
+    assert liability_row["side"] == Side.CREDIT

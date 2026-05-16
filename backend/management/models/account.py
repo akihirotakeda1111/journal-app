@@ -1,13 +1,8 @@
 from django.db import models
+from management.domain.constants import AccountType
 
 
 class Account(models.Model):
-    class TypeChoices(models.TextChoices):
-        ASSET = "ASSET", "資産"
-        LIABILITY = "LIABILITY", "負債"
-        EQUITY = "EQUITY", "純資産"
-        REVENUE = "REVENUE", "収益"
-        EXPENSE = "EXPENSE", "費用"
 
     # 勘定科目ID
     id = models.CharField(max_length=10, primary_key=True)
@@ -16,7 +11,7 @@ class Account(models.Model):
     name = models.CharField(max_length=50)
 
     # 勘定科目種別
-    type = models.CharField(max_length=20, choices=TypeChoices.choices)
+    type = models.CharField(max_length=20, choices=AccountType.CHOICES)
 
     class Meta:
         ordering = ["id"]

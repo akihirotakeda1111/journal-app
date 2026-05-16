@@ -4,7 +4,7 @@ from journal.serializers.journal_line import (
     JournalLineInputSerializer,
     JournalLineOutputSerializer,
 )
-from journal.domain.constants import JournalLineRules
+from journal.domain.constants import JournalLineRules, Side
 
 
 class JournalWithLinesInputSerializer(JournalInputSerializer):
@@ -15,8 +15,10 @@ class JournalWithLinesInputSerializer(JournalInputSerializer):
     def validate(self, data):
         """貸借合計の完全一致を検証"""
         lines = data.get("lines", [])
-        debit_sum = sum(line["amount"] for line in lines if line["side"] == "DEBIT")
-        credit_sum = sum(line["amount"] for line in lines if line["side"] == "CREDIT")
+        debit_sum = sum(line["amount"] for line in lines if line["side"] == Side.DEBIT)
+        credit_sum = sum(
+            line["amount"] for line in lines if line["side"] == Side.CREDIT
+        )
 
         if debit_sum != credit_sum:
             raise serializers.ValidationError(

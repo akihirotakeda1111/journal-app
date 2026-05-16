@@ -2,7 +2,7 @@ from django.db import transaction, IntegrityError
 from django.db.models import OuterRef, Exists
 from django.core.exceptions import ValidationError
 from journal.models import Journal, JournalLine
-from journal.domain.constants import AmountRules
+from journal.domain.constants import AmountRules, JournalType, Side
 from journal.exceptions.journal_exceptions import JournalAlreadyExistsError
 from uuid6 import uuid7
 
@@ -40,8 +40,10 @@ class JournalWithLinesService:
             if "side" not in line:
                 raise ValidationError(f"lines[{idx}].side is required")
 
-            if line["side"] not in ("DEBIT", "CREDIT"):
-                raise ValidationError(f"lines[{idx}].side must be DEBIT or CREDIT")
+            if line["side"] not in (Side.DEBIT, Side.CREDIT):
+                raise ValidationError(
+                    f"lines[{idx}].side must be {Side.DEBIT} or {Side.CREDIT}"
+                )
 
         return data
 
@@ -62,7 +64,7 @@ class JournalWithLinesService:
                     id=journal_id,
                     recorded_date=data["recorded_date"],
                     description=data.get("description", ""),
-                    type="NORMAL",
+                    type=JournalType.NORMAL,
                 )
 
                 # 仕訳明細の作成
@@ -70,7 +72,9 @@ class JournalWithLinesService:
                 for line in data["lines"]:
                     # 符号付き整数へ変換（DEBITは正、CREDITは負）
                     amount = (
-                        line["amount"] if line["side"] == "DEBIT" else -line["amount"]
+                        line["amount"]
+                        if line["side"] == Side.DEBIT
+                        else -line["amount"]
                     )
 
                     lines_to_create.append(
@@ -113,7 +117,7 @@ class JournalWithLinesService:
                     id=cancel_journal_id,
                     recorded_date=original_journal.recorded_date,
                     description=f"【取消】 {original_journal.description}",
-                    type="CANCEL",
+                    type=JournalType.CANCEL,
                     original_journal=original_journal,
                 )
 
@@ -135,7 +139,7 @@ class JournalWithLinesService:
                     id=new_journal_id,
                     recorded_date=new_journal_data["recorded_date"],
                     description=new_journal_data.get("description", ""),
-                    type="NORMAL",
+                    type=JournalType.NORMAL,
                     original_journal=cancel_journal,
                 )
 
@@ -143,7 +147,9 @@ class JournalWithLinesService:
                 new_lines = []
                 for line in new_journal_data["lines"]:
                     amount = (
-                        line["amount"] if line["side"] == "DEBIT" else -line["amount"]
+                        line["amount"]
+                        if line["side"] == Side.DEBIT
+                        else -line["amount"]
                     )
                     new_lines.append(
                         JournalLine(
@@ -168,7 +174,7 @@ class JournalWithLinesService:
         has_child = Journal.objects.filter(original_journal_id=OuterRef("id"))
 
         journals = (
-            Journal.objects.filter(type="NORMAL")
+            Journal.objects.filter(type=JournalType.NORMAL)
             .filter(~Exists(has_child))
             .prefetch_related("lines")
             .order_by("-recorded_date", "-created_at")

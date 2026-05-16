@@ -1,6 +1,7 @@
 import pytest
 from management.models import Account
 from management.serializers.account import AccountOutputSerializer
+from management.domain.constants import AccountType
 
 
 def test_account_output_serializer(db):
@@ -9,7 +10,7 @@ def test_account_output_serializer(db):
     account = Account.objects.create(
         id="T01",
         name="Test",
-        type="ASSET",
+        type=AccountType.ASSET,
     )
 
     serializer = AccountOutputSerializer(account)
@@ -17,5 +18,5 @@ def test_account_output_serializer(db):
 
     assert data["id"] == "T01"
     assert data["name"] == "Test"
-    assert data["type"] == "ASSET"
+    assert data["type"] == AccountType.ASSET
     assert set(data.keys()) == {"id", "name", "type"}

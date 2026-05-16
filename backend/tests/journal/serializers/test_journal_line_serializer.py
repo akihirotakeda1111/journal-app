@@ -4,7 +4,7 @@ from journal.serializers.journal_line import (
     JournalLineOutputSerializer,
 )
 from journal.models import Journal, JournalLine
-from journal.domain.constants import AmountRules
+from journal.domain.constants import AmountRules, JournalType, Side
 from uuid import UUID
 from datetime import date
 
@@ -13,13 +13,13 @@ from datetime import date
 def test_journal_line_input_serializer_valid(valid_amount):
     """正常にバリデーションが通ること"""
 
-    payload = {"side": "DEBIT", "account_id": "T01", "amount": valid_amount}
+    payload = {"side": Side.DEBIT, "account_id": "T01", "amount": valid_amount}
 
     serializer = JournalLineInputSerializer(data=payload)
     assert serializer.is_valid(), serializer.errors
 
     validated = serializer.validated_data
-    assert validated["side"] == "DEBIT"
+    assert validated["side"] == Side.DEBIT
     assert validated["account_id"] == "T01"
     assert validated["amount"] == valid_amount
 
@@ -40,7 +40,7 @@ def test_journal_line_input_serializer_invalid_side(invalid_side):
 def test_journal_line_input_serializer_invalid_amount_min(invalid_amount):
     """amount は 1 未満の場合、バリデーションエラーになること"""
 
-    payload = {"side": "DEBIT", "account_id": "T01", "amount": invalid_amount}
+    payload = {"side": Side.DEBIT, "account_id": "T01", "amount": invalid_amount}
 
     serializer = JournalLineInputSerializer(data=payload)
 
@@ -52,7 +52,7 @@ def test_journal_line_input_serializer_invalid_amount_min(invalid_amount):
 def test_journal_line_input_serializer_invalid_amount_max(invalid_amount):
     """amount は 13 桁以上の場合、バリデーションエラーになること"""
 
-    payload = {"side": "DEBIT", "account_id": "T01", "amount": invalid_amount}
+    payload = {"side": Side.DEBIT, "account_id": "T01", "amount": invalid_amount}
 
     serializer = JournalLineInputSerializer(data=payload)
 
@@ -64,7 +64,7 @@ def test_journal_line_input_serializer_account_id_max_length():
     """account_id の max_length=10 を超えるとバリデーションエラーになること"""
 
     long_id = "A" * 11
-    payload = {"side": "DEBIT", "account_id": long_id, "amount": 10}
+    payload = {"side": Side.DEBIT, "account_id": long_id, "amount": 10}
 
     serializer = JournalLineInputSerializer(data=payload)
 
@@ -83,7 +83,7 @@ def test_journal_line_output_serializer(db, setup_accounts):
         id=UUID("11111111-1111-1111-1111-111111111111"),
         recorded_date=date(2026, 1, 1),
         description="h",
-        type="NORMAL",
+        type=JournalType.NORMAL,
     )
 
     # 借方（正の値）
@@ -92,7 +92,7 @@ def test_journal_line_output_serializer(db, setup_accounts):
     )
     out_debit = JournalLineOutputSerializer(journal_debit).data
     assert out_debit["account_id"] == asset.id
-    assert out_debit["side"] == "DEBIT"
+    assert out_debit["side"] == Side.DEBIT
     assert out_debit["amount"] == 150
 
     # 貸方（負の値）
@@ -101,5 +101,5 @@ def test_journal_line_output_serializer(db, setup_accounts):
     )
     out_credit = JournalLineOutputSerializer(journal_credit).data
     assert out_credit["account_id"] == liability.id
-    assert out_credit["side"] == "CREDIT"
+    assert out_credit["side"] == Side.CREDIT
     assert out_credit["amount"] == 150

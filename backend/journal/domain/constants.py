@@ -5,3 +5,23 @@ class AmountRules:
 
 class JournalLineRules:
     MAX_ROW = 100
+
+
+class JournalType:
+    NORMAL = "NORMAL"
+    CANCEL = "CANCEL"
+
+    CHOICES = (
+        (NORMAL, "通常"),
+        (CANCEL, "取消"),
+    )
+
+
+class Side:
+    DEBIT = "DEBIT"
+    CREDIT = "CREDIT"
+
+    CHOICES = (
+        (DEBIT, "借方"),
+        (CREDIT, "貸方"),
+    )
