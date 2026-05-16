@@ -1,7 +1,7 @@
 import "../styles/trialBalance.css";
 import { useMemo, useState, useEffect } from "react";
 import useSWR from "swr";
-import { fetcher } from "../utils/fetcher";
+import { fetcher } from "@/utils/fetcher";
 import type { TrialBalanceOutput } from "./types";
 import { Side, SideLabels } from "./constants/side";
 

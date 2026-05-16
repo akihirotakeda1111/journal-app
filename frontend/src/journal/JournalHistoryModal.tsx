@@ -1,6 +1,6 @@
 import React from "react";
 import useSWR from "swr";
-import { fetcher } from "../utils/fetcher";
+import { fetcher } from "@/utils/fetcher";
 import type { JournalWithLinesOutput } from "./types/journalWithLines";
 import { Side, SideLabels } from "./constants/side";
 import { JournalType, JournalTypeLabels } from "./constants/journalType";

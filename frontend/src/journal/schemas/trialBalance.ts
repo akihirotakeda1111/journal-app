@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Side } from "../constants/side";
-import { AccountType } from "../../management/constants/accountType";
+import { AccountType } from "@/management/constants/accountType";
 
 export const TrialBalanceOutputSchema = z.object({
   accountId: z.string(),

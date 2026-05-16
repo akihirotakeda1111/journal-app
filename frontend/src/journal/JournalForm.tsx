@@ -2,11 +2,11 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { uuidv7 } from "uuidv7";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSWR from "swr";
-import { fetcher } from "../utils/fetcher";
+import { fetcher } from "@/utils/fetcher";
 import { JournalWithLinesInputSchema } from "./schemas";
 import type { JournalWithLinesInput } from "./types";
-import { createJournal, reviseJournal } from "../utils/api/journal";
-import type { AccountOutput } from "../management/types";
+import { createJournal, reviseJournal } from "@/utils/api/journal";
+import type { AccountOutput } from "@/management/types";
 import { Side, SideLabels } from "./constants/side";
 
 type JournalFormProps = {
