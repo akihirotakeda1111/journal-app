@@ -1,27 +1,27 @@
 import { apiClient } from "./client";
-import { JournalWithLinesInputSchema, JournalWithLinesOutputSchema } from "../../journal/schemas/journalWithLines";
-import type { JournalWithLinesInput, JournalWithLinesOutput } from "../../journal/types/journalWithLines";
+import { JournalWithLinesFormSchema, JournalWithLinesApiSchema } from "../../journal/schemas/journalWithLines";
+import type { JournalWithLinesForm, JournalWithLinesApi } from "../../journal/types/journalWithLines";
 
-export async function createJournal(data: JournalWithLinesInput): Promise<JournalWithLinesInput> {
-  const validated = JournalWithLinesInputSchema.parse(data);
+export async function createJournal(data: JournalWithLinesForm): Promise<JournalWithLinesForm> {
+  const validated = JournalWithLinesFormSchema.parse(data);
   const res = await apiClient.post("/journal/", validated);
 
   return res.data;
 }
 
-export async function reviseJournal(originalId: string, data: JournalWithLinesInput): Promise<JournalWithLinesInput> {
-  const validated = JournalWithLinesInputSchema.parse(data);
+export async function reviseJournal(originalId: string, data: JournalWithLinesForm): Promise<JournalWithLinesForm> {
+  const validated = JournalWithLinesFormSchema.parse(data);
   const res = await apiClient.post(`/journal/revise/${originalId}/`, validated);
 
   return res.data;
 }
 
-export async function fetchJournal(id: string): Promise<JournalWithLinesOutput> {
+export async function fetchJournal(id: string): Promise<JournalWithLinesApi> {
   const res = await apiClient.get(`/journal/${id}/`);
-  return JournalWithLinesOutputSchema.parse(res.data);
+  return JournalWithLinesApiSchema.parse(res.data);
 }
 
-export async function fetchJournalList(): Promise<JournalWithLinesOutput[]> {
+export async function fetchJournalList(): Promise<JournalWithLinesApi[]> {
   const res = await apiClient.get("journal/list/");
-  return JournalWithLinesOutputSchema.array().parse(res.data);
+  return JournalWithLinesApiSchema.array().parse(res.data);
 }

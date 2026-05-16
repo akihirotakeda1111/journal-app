@@ -3,11 +3,12 @@ import { uuidv7 } from "uuidv7";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useSWR from "swr";
 import { fetcher } from "@/utils/fetcher";
-import { JournalWithLinesInputSchema } from "./schemas";
-import type { JournalWithLinesInput } from "./types";
+import { JournalWithLinesFormSchema } from "./schemas";
+import type { JournalWithLinesForm } from "./types";
 import { createJournal, reviseJournal } from "@/utils/api/journal";
-import type { AccountOutput } from "@/management/types";
+import type { AccountApi } from "@/management/types";
 import { Side, SideLabels } from "./constants/side";
+import { AmountRules } from "./constants/amountRules";
 
 type JournalFormProps = {
   mode: "create" | "revise";
@@ -17,7 +18,7 @@ type JournalFormProps = {
 };
 
 export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormProps) {
-  const createDefaultValues = (): JournalWithLinesInput => ({
+  const createDefaultValues = (): JournalWithLinesForm => ({
     id: uuidv7(),
     recordedDate: new Date().toISOString().split("T")[0],
     description: "",
@@ -34,8 +35,8 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
     watch,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<JournalWithLinesInput>({
-    resolver: zodResolver(JournalWithLinesInputSchema),
+  } = useForm<JournalWithLinesForm>({
+    resolver: zodResolver(JournalWithLinesFormSchema),
     defaultValues: createDefaultValues(),
   });
 
@@ -44,7 +45,7 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
     name: "lines",
   });
 
-  const { data: accounts } = useSWR<AccountOutput[]>(
+  const { data: accounts } = useSWR<AccountApi[]>(
     "/management/account/list/",
     fetcher
   );
@@ -57,7 +58,7 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
     .filter((l) => l.side === Side.CREDIT)
     .reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
 
-  const onSubmit = async (data: JournalWithLinesInput) => {
+  const onSubmit = async (data: JournalWithLinesForm) => {
     if (mode === "create") {
       await createJournal(data);
     } else {
@@ -78,7 +79,7 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
         <div>
           <label className="label">計上日</label>
           <input type="date" {...register("recordedDate")} className="input" />
-          {errors.recordedDate && <p className="text-red-500">{errors.recordedDate.message}</p>}
+          {errors.recordedDate && <p className="error-message">{errors.recordedDate.message}</p>}
         </div>
         <div>
           <label className="label">摘要（全体）</label>
@@ -102,10 +103,12 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
                       </option>
                     ))}
                   </select>
-                  <input type="number" {...register(`lines.${index}.amount`, { valueAsNumber: true })} placeholder="金額" className="line-input" />
+                  <input type="text" {...register(`lines.${index}.amount`)}
+                    maxLength={AmountRules.MAX.toString().length} placeholder="金額" className="line-input" />
                   <button type="button" onClick={() => remove(index)} className="btn-remove">✕</button>
                 </div>
-                {errors.lines?.[index]?.amount && <span className="error-message">エラー</span>}
+                {errors.lines?.[index]?.accountId && <p className="error-message">{errors.lines?.[index]?.accountId.message}</p>}
+                {errors.lines?.[index]?.amount && <p className="error-message">{errors.lines?.[index]?.amount.message}</p>}
               </div>
             );
           })}
@@ -128,10 +131,12 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
                       </option>
                     ))}
                   </select>
-                  <input type="number" {...register(`lines.${index}.amount`, { valueAsNumber: true })} placeholder="金額" className="line-input" />
+                  <input type="text" {...register(`lines.${index}.amount`)}
+                    maxLength={AmountRules.MAX.toString().length} placeholder="金額" className="line-input" />
                   <button type="button" onClick={() => remove(index)} className="btn-remove">✕</button>
                 </div>
-                {errors.lines?.[index]?.amount && <span className="error-message">エラー</span>}
+                {errors.lines?.[index]?.accountId && <p className="error-message">{errors.lines?.[index]?.accountId.message}</p>}
+                {errors.lines?.[index]?.amount && <p className="error-message">{errors.lines?.[index]?.amount.message}</p>}
               </div>
             );
           })}

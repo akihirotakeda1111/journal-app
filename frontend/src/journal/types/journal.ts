@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { JournalInputSchema, JournalOutputSchema } from "../schemas/journal";
+import { JournalFormSchema, JournalApiSchema } from "../schemas/journal";
 
-export type JournalInput = z.infer<typeof JournalInputSchema>;
-export type JournalOutput = z.infer<typeof JournalOutputSchema>;
+export type JournalForm = z.infer<typeof JournalFormSchema>;
+export type JournalApi = z.infer<typeof JournalApiSchema>;

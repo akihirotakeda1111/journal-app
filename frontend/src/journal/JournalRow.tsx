@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import type { JournalWithLinesOutput } from "./types";
+import type { JournalWithLinesApi } from "./types";
 import { JournalForm } from "./JournalForm";
 import { JournalHistoryModal } from "./JournalHistoryModal";
 import { Side } from "./constants/side";
 
 interface Props {
-  journal: JournalWithLinesOutput;
+  journal: JournalWithLinesApi;
   onMutate: () => void;
 }
 

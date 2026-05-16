@@ -1,9 +1,9 @@
 import { apiClient } from "./client";
-import { AccountOutputSchema } from "../../management/schemas/account";
-import type { AccountOutput } from "../../management/types/account";
+import { AccountApiSchema } from "../../management/schemas/account";
+import type { AccountApi } from "../../management/types/account";
 
-export async function fetchAccountList(): Promise<AccountOutput[]> {
+export async function fetchAccountList(): Promise<AccountApi[]> {
   const res = await apiClient.get("/management/account/list/");
 
-  return AccountOutputSchema.array().parse(res.data);
+  return AccountApiSchema.array().parse(res.data);
 }

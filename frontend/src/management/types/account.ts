@@ -1,4 +1,4 @@
 import { z } from "zod";
-import { AccountOutputSchema } from "../schemas/account";
+import { AccountApiSchema } from "../schemas/account";
 
-export type AccountOutput = z.infer<typeof AccountOutputSchema>;
+export type AccountApi = z.infer<typeof AccountApiSchema>;

@@ -1,7 +1,7 @@
 import React from "react";
 import useSWR from "swr";
 import { fetcher } from "@/utils/fetcher";
-import type { JournalWithLinesOutput } from "./types/journalWithLines";
+import type { JournalWithLinesApi } from "./types/journalWithLines";
 import { Side, SideLabels } from "./constants/side";
 import { JournalType, JournalTypeLabels } from "./constants/journalType";
 
@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const JournalHistoryModal: React.FC<Props> = ({ journalId, onClose }) => {
-    const { data: history, error, isLoading } = useSWR<JournalWithLinesOutput[]>(
+    const { data: history, error, isLoading } = useSWR<JournalWithLinesApi[]>(
         `/journal/${journalId}/history/`,
         fetcher
     );

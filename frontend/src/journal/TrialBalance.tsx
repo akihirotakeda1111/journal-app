@@ -2,7 +2,7 @@ import "../styles/trialBalance.css";
 import { useMemo, useState, useEffect } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/utils/fetcher";
-import type { TrialBalanceOutput } from "./types";
+import type { TrialBalanceApi } from "./types";
 import { Side, SideLabels } from "./constants/side";
 
 export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
@@ -16,7 +16,7 @@ export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
         return `/journal/trial_balance/?${params.toString()}`;
     }, [start, end]);
 
-    const { data: balances, error, isLoading, mutate } = useSWR<TrialBalanceOutput[]>(query, fetcher);
+    const { data: balances, error, isLoading, mutate } = useSWR<TrialBalanceApi[]>(query, fetcher);
     useEffect(() => {
         mutate();
     }, [refreshKey, mutate]);

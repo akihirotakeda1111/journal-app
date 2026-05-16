@@ -8,7 +8,7 @@ import { JournalList } from "./journal/JournalList";
 import { TrialBalance } from "./journal/TrialBalance";
 import useSWR from "swr";
 import { fetcher } from "./utils/fetcher";
-import type { JournalWithLinesOutput } from "./journal/types";
+import type { JournalWithLinesApi } from "./journal/types";
 
 function App() {
   const [activeTab, setActiveTab] = useState<"journal" | "trial">("journal");
@@ -19,7 +19,7 @@ function App() {
     setRefreshKey((prev) => prev + 1);
   };
 
-  const { data: journals, error, isLoading, mutate } = useSWR<JournalWithLinesOutput[]>(
+  const { data: journals, error, isLoading, mutate } = useSWR<JournalWithLinesApi[]>(
     "/journal/list/",
     fetcher
   );
