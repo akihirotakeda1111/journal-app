@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import type { JournalWithLinesOutput } from "./types";
 import { JournalForm } from "./JournalForm";
 import { JournalHistoryModal } from "./JournalHistoryModal";
+import { Side } from "./constants/side";
 
 interface Props {
   journal: JournalWithLinesOutput;
@@ -12,8 +13,8 @@ export const JournalRow: React.FC<Props> = ({ journal, onMutate }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-    const debitLines = journal.lines.filter((l) => l.side === "DEBIT");
-    const creditLines = journal.lines.filter((l) => l.side === "CREDIT");
+    const debitLines = journal.lines.filter((l) => l.side === Side.DEBIT);
+    const creditLines = journal.lines.filter((l) => l.side === Side.CREDIT);
 
     return (
         <div key={journal.id} className="row-container">

@@ -7,6 +7,7 @@ import { JournalWithLinesInputSchema } from "./schemas";
 import type { JournalWithLinesInput } from "./types";
 import { createJournal, reviseJournal } from "../utils/api/journal";
 import type { AccountOutput } from "../management/types";
+import { Side, SideLabels } from "./constants/side";
 
 type JournalFormProps = {
   mode: "create" | "revise";
@@ -21,8 +22,8 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
     recordedDate: new Date().toISOString().split("T")[0],
     description: "",
     lines: [
-      { side: "DEBIT", accountId: "", amount: 0 },
-      { side: "CREDIT", accountId: "", amount: 0 },
+      { side: Side.DEBIT, accountId: "", amount: 0 },
+      { side: Side.CREDIT, accountId: "", amount: 0 },
     ],
   });
   
@@ -50,10 +51,10 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
 
   const watchedLines = watch("lines");
   const debitSum = watchedLines
-    .filter((l) => l.side === "DEBIT")
+    .filter((l) => l.side === Side.DEBIT)
     .reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
   const creditSum = watchedLines
-    .filter((l) => l.side === "CREDIT")
+    .filter((l) => l.side === Side.CREDIT)
     .reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
 
   const onSubmit = async (data: JournalWithLinesInput) => {
@@ -88,9 +89,9 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
       {/* 明細情報 */}
       <div className="section row">
         <div>
-          <h3 className="block-title">借方 (DEBIT)</h3>
+          <h3 className="block-title">{SideLabels[Side.DEBIT]}</h3>
           {fields.map((field, index) => {
-            if (field.side !== "DEBIT") return null;
+            if (field.side !== Side.DEBIT) return null;
             return (
               <div key={field.id}>
                 <div className="line-row">
@@ -108,15 +109,15 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
               </div>
             );
           })}
-          <button type="button" onClick={() => append({ side: "DEBIT", accountId: "", amount: 0 })} className="btn btn-link">
-            + 借方を追加
+          <button type="button" onClick={() => append({ side: Side.DEBIT, accountId: "", amount: 0 })} className="btn btn-link">
+            + {SideLabels[Side.DEBIT]}を追加
           </button>
         </div>
 
         <div>
-          <h3 className="block-title">貸方 (CREDIT)</h3>
+          <h3 className="block-title">{SideLabels[Side.CREDIT]}</h3>
           {fields.map((field, index) => {
-            if (field.side !== "CREDIT") return null;
+            if (field.side !== Side.CREDIT) return null;
             return (
               <div key={field.id}>
                 <div className="line-row">
@@ -134,8 +135,8 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
               </div>
             );
           })}
-          <button type="button" onClick={() => append({ side: "CREDIT", accountId: "", amount: 0 })} className="btn btn-link">
-            + 貸方を追加
+          <button type="button" onClick={() => append({ side: Side.CREDIT, accountId: "", amount: 0 })} className="btn btn-link">
+            + {SideLabels[Side.CREDIT]}を追加
           </button>
         </div>
       </div>
@@ -144,7 +145,7 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
       <div>
         <div>
           <div className="label">
-            借方 {debitSum.toLocaleString()} / 貸方 {creditSum.toLocaleString()}
+            {SideLabels[Side.DEBIT]} {debitSum.toLocaleString()} / {SideLabels[Side.CREDIT]} {creditSum.toLocaleString()}
           </div>
           {errors.lines?.root && (
             <div className="error-message">{errors.lines.root.message}</div>

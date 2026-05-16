@@ -3,6 +3,7 @@ import { useMemo, useState, useEffect } from "react";
 import useSWR from "swr";
 import { fetcher } from "../utils/fetcher";
 import type { TrialBalanceOutput } from "./types";
+import { Side, SideLabels } from "./constants/side";
 
 export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
     const [start, setStart] = useState("");
@@ -24,11 +25,11 @@ export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
         if (!balances) return { totalDebit: 0, totalCredit: 0, isBalanced: true };
 
         const debit = balances
-            .filter((b) => b.side === "DEBIT")
+            .filter((b) => b.side === Side.DEBIT)
             .reduce((sum, b) => sum + b.balance, 0);
 
         const credit = balances
-            .filter((b) => b.side === "CREDIT")
+            .filter((b) => b.side === Side.CREDIT)
             .reduce((sum, b) => sum + b.balance, 0);
 
         return {
@@ -66,8 +67,8 @@ export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
                             <tr>
                                 <th>科目コード</th>
                                 <th>勘定科目</th>
-                                <th className="tb-debit">借方残高</th>
-                                <th className="tb-credit">貸方残高</th>
+                                <th className="tb-debit">{SideLabels[Side.DEBIT]}残高</th>
+                                <th className="tb-credit">{SideLabels[Side.CREDIT]}残高</th>
                             </tr>
                         </thead>
 
@@ -78,11 +79,11 @@ export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
                                     <td>{row.accountName}</td>
 
                                     <td className="tb-debit">
-                                        {row.side === "DEBIT" ? row.balance.toLocaleString() : ""}
+                                        {row.side === Side.DEBIT ? row.balance.toLocaleString() : ""}
                                     </td>
 
                                     <td className="tb-credit">
-                                        {row.side === "CREDIT" ? row.balance.toLocaleString() : ""}
+                                        {row.side === Side.CREDIT ? row.balance.toLocaleString() : ""}
                                     </td>
                                 </tr>
                             ))}
@@ -101,7 +102,7 @@ export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
 
             {!isBalanced && (
                 <div className="tb-alert">
-                    借方と貸方に差額 {Math.abs(totalDebit - totalCredit).toLocaleString()} があります。
+                    {SideLabels[Side.DEBIT]}と{SideLabels[Side.CREDIT]}に差額 {Math.abs(totalDebit - totalCredit).toLocaleString()} があります。
                 </div>
             )}
 

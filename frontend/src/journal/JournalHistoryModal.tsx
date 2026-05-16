@@ -2,6 +2,8 @@ import React from "react";
 import useSWR from "swr";
 import { fetcher } from "../utils/fetcher";
 import type { JournalWithLinesOutput } from "./types/journalWithLines";
+import { Side, SideLabels } from "./constants/side";
+import { JournalType, JournalTypeLabels } from "./constants/journalType";
 
 interface Props {
     journalId: string;
@@ -35,14 +37,14 @@ export const JournalHistoryModal: React.FC<Props> = ({ journalId, onClose }) => 
                             {history.map((journal, index) => {
                                 const isFirst = index === 0;
                                 const isLatest = index === history.length - 1;
-                                const isCancel = journal.type === "CANCEL";
+                                const isCancel = journal.type === JournalType.CANCEL;
 
                                 let badgeClass = "badge badge-blue";
                                 let label = isFirst ? "最初の入力" : "修正（黒）";
 
                                 if (isCancel) {
                                     badgeClass = "badge badge-red";
-                                    label = "取消（赤）";
+                                    label = `${JournalTypeLabels[JournalType.CANCEL]}（赤）`;
                                 }
                                 if (isLatest) {
                                     badgeClass = "badge badge-green";
@@ -67,9 +69,9 @@ export const JournalHistoryModal: React.FC<Props> = ({ journalId, onClose }) => 
                                     
                                             {/* 明細の簡易表示 */}
                                             {journal.lines.map((l, i) => (
-                                                <div key={i} className={`flex justify-between ${l.side === "DEBIT" ? "line-debit" : "line-credit"}`}>
+                                                <div key={i} className={`flex justify-between ${l.side === Side.DEBIT ? "line-debit" : "line-credit"}`}>
                                                     <span>
-                                                        {l.side === "DEBIT" ? "(借)" : "(貸)"} {l.accountId}
+                                                        {l.side === Side.DEBIT ? `(${SideLabels[Side.DEBIT]})` : `(${SideLabels[Side.CREDIT]})`} {l.accountId}
                                                     </span>
                                                     <span>
                                                         {l.amount.toLocaleString()}
