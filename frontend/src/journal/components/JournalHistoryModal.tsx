@@ -66,10 +66,7 @@ export const JournalHistoryModal: React.FC<Props> = ({ journalId, onClose }) => 
                                             {journal.lines.map((l, i) => (
                                                 <div key={i} className={`flex justify-between ${l.side === Side.DEBIT ? "line-debit" : "line-credit"}`}>
                                                     <span>
-                                                        {l.side === Side.DEBIT ? `(${SideLabels[Side.DEBIT]})` : `(${SideLabels[Side.CREDIT]})`} {l.accountId}
-                                                    </span>
-                                                    <span>
-                                                        {l.amount.toLocaleString()}
+                                                        {`(${SideLabels[l.side]}) ${l.account.id} ${l.account.name} ${l.amount.toLocaleString()}}`}
                                                     </span>
                                                 </div>
                                             ))}

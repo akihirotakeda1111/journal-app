@@ -3,6 +3,9 @@ from journal.serializers.journal_with_lines import (
     JournalWithLinesInputSerializer,
     JournalWithLinesOutputSerializer,
 )
+from journal.serializers.journal_with_lines_and_account import (
+    JournalWithLinesAndAccountSerializer,
+)
 from journal.services.journal_with_lines import JournalWithLinesService
 from rest_framework.response import Response
 from rest_framework import status
@@ -43,7 +46,7 @@ class JournalWithLinesHistoryAPIView(APIView):
     def get(self, request, journal_id):
         journals = JournalWithLinesService.history(journal_id)
 
-        output = JournalWithLinesOutputSerializer(journals, many=True)
+        output = JournalWithLinesAndAccountSerializer(journals, many=True)
 
         return Response(output.data, status=status.HTTP_200_OK)
 

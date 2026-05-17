@@ -201,7 +201,9 @@ class JournalWithLinesService:
                 break
 
         # 仕訳を一括取得
-        journals = Journal.objects.filter(id__in=ids).prefetch_related("lines")
+        journals = Journal.objects.filter(id__in=ids).prefetch_related(
+            "lines", "lines__account"
+        )
 
         # 古い順に並び替え
         journal_map = {j.id: j for j in journals}

@@ -2,7 +2,8 @@ import pytest
 from unittest.mock import patch
 from rest_framework import status
 from uuid import UUID
-from journal.domain.constants import Side
+from journal.domain.constants import Side, JournalType
+from management.domain.constants import AccountType
 
 BASE_CREATE = "/api/journal/"
 BASE_REVISE = "/api/journal/revise/{journal_id}/"
@@ -143,11 +144,26 @@ def test_journal_with_lines_view_history(client):
         {
             "id": "22222222-2222-2222-2222-222222222222",
             "recordedDate": "2026-01-01",
-            "lines": [],
+            "description": "テスト仕訳",
+            "type": JournalType.NORMAL,
+            "lines": [
+                {
+                    "accountId": "101",
+                    "side": Side.DEBIT,
+                    "amount": 1000,
+                    "account": {
+                        "id": "101",
+                        "name": AccountType.LABELS[AccountType.ASSET],
+                        "type": AccountType.ASSET,
+                    },
+                }
+            ],
         },
     ]
 
-    output_path = "journal.views.journal_with_lines.JournalWithLinesOutputSerializer"
+    output_path = (
+        "journal.views.journal_with_lines.JournalWithLinesAndAccountSerializer"
+    )
     service_path = "journal.views.journal_with_lines.JournalWithLinesService.history"
 
     with patch(output_path, new=DummyOutputSerializer), patch(
