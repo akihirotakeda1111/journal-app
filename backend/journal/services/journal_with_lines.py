@@ -83,34 +83,31 @@ class JournalWithLinesService:
             raise JournalAlreadyExistsError(journal_id)
 
         try:
-            with transaction.atomic():
-                # 仕訳ヘッダーの作成
-                journal = Journal.objects.create(
-                    id=journal_id,
-                    recorded_date=data["recorded_date"],
-                    description=data.get("description", ""),
-                    type=JournalType.NORMAL,
+            # 仕訳ヘッダーの作成
+            journal = Journal.objects.create(
+                id=journal_id,
+                recorded_date=data["recorded_date"],
+                description=data.get("description", ""),
+                type=JournalType.NORMAL,
+            )
+
+            # 仕訳明細の作成
+            lines_to_create = []
+            for line in data["lines"]:
+                # 符号付き整数へ変換（DEBITは正、CREDITは負）
+                amount = (
+                    line["amount"] if line["side"] == Side.DEBIT else -line["amount"]
                 )
 
-                # 仕訳明細の作成
-                lines_to_create = []
-                for line in data["lines"]:
-                    # 符号付き整数へ変換（DEBITは正、CREDITは負）
-                    amount = (
-                        line["amount"]
-                        if line["side"] == Side.DEBIT
-                        else -line["amount"]
+                lines_to_create.append(
+                    JournalLine(
+                        journal=journal,
+                        account_id=line["account_id"],
+                        amount=amount,
                     )
+                )
 
-                    lines_to_create.append(
-                        JournalLine(
-                            journal=journal,
-                            account_id=line["account_id"],
-                            amount=amount,
-                        )
-                    )
-
-                JournalLine.objects.bulk_create(lines_to_create)
+            JournalLine.objects.bulk_create(lines_to_create)
 
         except IntegrityError:
             # すでに同じUUIDが存在する場合の再チェック
@@ -127,20 +124,19 @@ class JournalWithLinesService:
         """逆仕訳の作成"""
 
         try:
-            with transaction.atomic():
-                # 元の仕訳を取得
-                original_journal = (
-                    Journal.objects.select_for_update()
-                    .prefetch_related("lines")
-                    .get(id=original_journal_id)
-                )
+            # 元の仕訳を取得
+            original_journal = (
+                Journal.objects.select_for_update()
+                .prefetch_related("lines")
+                .get(id=original_journal_id)
+            )
 
-                # 逆仕訳の自動生成
-                cancel_journal = JournalWithLinesService._create_cancel_journal(
-                    original_journal
-                )
+            # 逆仕訳の自動生成
+            cancel_journal = JournalWithLinesService._create_cancel_journal(
+                original_journal
+            )
 
-                return cancel_journal
+            return cancel_journal
 
         except Journal.DoesNotExist:
             raise ValidationError("対象の仕訳が存在しません。")
@@ -155,47 +151,44 @@ class JournalWithLinesService:
         new_journal_data = JournalWithLinesService._clean(new_journal_data)
 
         try:
-            with transaction.atomic():
-                # 元の仕訳を取得
-                original_journal = (
-                    Journal.objects.select_for_update()
-                    .prefetch_related("lines")
-                    .get(id=original_journal_id)
-                )
+            # 元の仕訳を取得
+            original_journal = (
+                Journal.objects.select_for_update()
+                .prefetch_related("lines")
+                .get(id=original_journal_id)
+            )
 
-                # 逆仕訳の自動生成
-                cancel_journal = JournalWithLinesService._create_cancel_journal(
-                    original_journal
-                )
+            # 逆仕訳の自動生成
+            cancel_journal = JournalWithLinesService._create_cancel_journal(
+                original_journal
+            )
 
-                # 訂正仕訳の作成
-                new_journal_id = new_journal_data["id"]
-                new_journal = Journal.objects.create(
-                    id=new_journal_id,
-                    recorded_date=new_journal_data["recorded_date"],
-                    description=new_journal_data.get("description", ""),
-                    type=JournalType.NORMAL,
-                    original_journal=cancel_journal,
-                )
+            # 訂正仕訳の作成
+            new_journal_id = new_journal_data["id"]
+            new_journal = Journal.objects.create(
+                id=new_journal_id,
+                recorded_date=new_journal_data["recorded_date"],
+                description=new_journal_data.get("description", ""),
+                type=JournalType.NORMAL,
+                original_journal=cancel_journal,
+            )
 
-                # 訂正仕訳の明細作成
-                new_lines = []
-                for line in new_journal_data["lines"]:
-                    amount = (
-                        line["amount"]
-                        if line["side"] == Side.DEBIT
-                        else -line["amount"]
+            # 訂正仕訳の明細作成
+            new_lines = []
+            for line in new_journal_data["lines"]:
+                amount = (
+                    line["amount"] if line["side"] == Side.DEBIT else -line["amount"]
+                )
+                new_lines.append(
+                    JournalLine(
+                        journal=new_journal,
+                        account_id=line["account_id"],
+                        amount=amount,
                     )
-                    new_lines.append(
-                        JournalLine(
-                            journal=new_journal,
-                            account_id=line["account_id"],
-                            amount=amount,
-                        )
-                    )
-                JournalLine.objects.bulk_create(new_lines)
+                )
+            JournalLine.objects.bulk_create(new_lines)
 
-                return new_journal
+            return new_journal
 
         except Journal.DoesNotExist:
             raise ValidationError("対象の仕訳が存在しません。")
