@@ -1,36 +1,25 @@
-import "../styles/trialBalance.css";
-import { useMemo, useState, useEffect } from "react";
+import "@/styles/trialBalance.css";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
 import { fetcher } from "@/utils/fetcher";
-import type { TrialBalanceApi } from "./types";
-import { Side, SideLabels } from "./constants/side";
+import type { TrialBalanceApi } from "../types";
+import { Side, SideLabels } from "../constants/side";
+import { buildTrialBalanceQuery } from "../services/query";
+import { calcBalances } from "../services/calc";
 
 export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
     const [start, setStart] = useState("");
     const [end, setEnd] = useState("");
 
-    const query = useMemo(() => {
-        const params = new URLSearchParams();
-        if (start) params.append("start", start);
-        if (end) params.append("end", end);
-        return `/journal/trial_balance/?${params.toString()}`;
-    }, [start, end]);
+    const query = useMemo(() => 
+        buildTrialBalanceQuery(start, end) + `&refresh=${refreshKey}`, [start, end, refreshKey]);
 
-    const { data: balances, error, isLoading, mutate } = useSWR<TrialBalanceApi[]>(query, fetcher);
-    useEffect(() => {
-        mutate();
-    }, [refreshKey, mutate]);
+    const { data: balances, error, isLoading } = useSWR<TrialBalanceApi[]>(query, fetcher);
 
     const { totalDebit, totalCredit, isBalanced } = useMemo(() => {
         if (!balances) return { totalDebit: 0, totalCredit: 0, isBalanced: true };
 
-        const debit = balances
-            .filter((b) => b.side === Side.DEBIT)
-            .reduce((sum, b) => sum + b.balance, 0);
-
-        const credit = balances
-            .filter((b) => b.side === Side.CREDIT)
-            .reduce((sum, b) => sum + b.balance, 0);
+        const { debit, credit } = calcBalances(balances);
 
         return {
             totalDebit: debit,

@@ -1,14 +1,13 @@
 import { useForm, useFieldArray } from "react-hook-form";
-import { uuidv7 } from "uuidv7";
 import { zodResolver } from "@hookform/resolvers/zod";
-import useSWR from "swr";
-import { fetcher } from "@/utils/fetcher";
-import { JournalWithLinesFormSchema } from "./schemas";
-import type { JournalWithLinesForm } from "./types";
+import { JournalWithLinesFormSchema } from "../schemas";
+import type { JournalWithLinesForm } from "../types";
 import { createJournal, reviseJournal } from "@/utils/api/journal";
-import type { AccountApi } from "@/management/types";
-import { Side, SideLabels } from "./constants/side";
-import { AmountRules } from "./constants/amountRules";
+import { useAccounts } from "@/management/hooks/useAccounts";
+import { Side, SideLabels } from "../constants/side";
+import { AmountRules } from "../constants/amountRules";
+import { createJournalDefaultValues } from "../services/defaultValues";
+import { calcDebitSum, calcCreditSum } from "../services/calc";
 
 type JournalFormProps = {
   mode: "create" | "revise";
@@ -18,16 +17,6 @@ type JournalFormProps = {
 };
 
 export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormProps) {
-  const createDefaultValues = (): JournalWithLinesForm => ({
-    id: uuidv7(),
-    recordedDate: new Date().toISOString().split("T")[0],
-    description: "",
-    lines: [
-      { side: Side.DEBIT, accountId: "", amount: 0 },
-      { side: Side.CREDIT, accountId: "", amount: 0 },
-    ],
-  });
-  
   const {
     register,
     control,
@@ -37,7 +26,7 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
     formState: { errors, isSubmitting },
   } = useForm<JournalWithLinesForm>({
     resolver: zodResolver(JournalWithLinesFormSchema),
-    defaultValues: createDefaultValues(),
+    defaultValues: createJournalDefaultValues(),
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -45,18 +34,11 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
     name: "lines",
   });
 
-  const { data: accounts } = useSWR<AccountApi[]>(
-    "/management/account/list/",
-    fetcher
-  );
+  const { accounts } = useAccounts();
 
   const watchedLines = watch("lines");
-  const debitSum = watchedLines
-    .filter((l) => l.side === Side.DEBIT)
-    .reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
-  const creditSum = watchedLines
-    .filter((l) => l.side === Side.CREDIT)
-    .reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
+  const debitSum = calcDebitSum(watchedLines);
+  const creditSum = calcCreditSum(watchedLines);
 
   const onSubmit = async (data: JournalWithLinesForm) => {
     if (mode === "create") {
@@ -66,7 +48,7 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
     }
 
     mutate();
-    reset(createDefaultValues());
+    reset(createJournalDefaultValues());
     onDone();
   };
 

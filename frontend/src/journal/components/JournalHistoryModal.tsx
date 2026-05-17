@@ -1,9 +1,7 @@
 import React from "react";
-import useSWR from "swr";
-import { fetcher } from "@/utils/fetcher";
-import type { JournalWithLinesApi } from "./types/journalWithLines";
-import { Side, SideLabels } from "./constants/side";
-import { JournalType, JournalTypeLabels } from "./constants/journalType";
+import { useJournalHistory } from "../hooks/useJournalHistory";
+import { Side, SideLabels } from "../constants/side";
+import { JournalType, JournalTypeLabels } from "../constants/journalType";
 
 interface Props {
     journalId: string;
@@ -11,10 +9,7 @@ interface Props {
 }
 
 export const JournalHistoryModal: React.FC<Props> = ({ journalId, onClose }) => {
-    const { data: history, error, isLoading } = useSWR<JournalWithLinesApi[]>(
-        `/journal/${journalId}/history/`,
-        fetcher
-    );
+    const { history, error, isLoading } = useJournalHistory(journalId);
 
     return (
         <div className="modal-overlay">

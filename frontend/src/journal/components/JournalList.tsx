@@ -1,5 +1,5 @@
 import { JournalRow } from "./JournalRow";
-import type { JournalWithLinesApi } from "./types/journalWithLines";
+import type { JournalWithLinesApi } from "../types/journalWithLines";
 
 type JournalListProps = {
   journals: JournalWithLinesApi[] | null;

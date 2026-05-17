@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import type { JournalWithLinesApi } from "./types";
+import type { JournalWithLinesApi } from "../types";
 import { JournalForm } from "./JournalForm";
 import { JournalHistoryModal } from "./JournalHistoryModal";
-import { Side } from "./constants/side";
+import { Side } from "../constants/side";
 
 interface Props {
   journal: JournalWithLinesApi;
