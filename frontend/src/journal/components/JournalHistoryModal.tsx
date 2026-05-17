@@ -59,14 +59,18 @@ export const JournalHistoryModal: React.FC<Props> = ({ journalId, onClose }) => 
                                             </div>
                                     
                                             <div style={{ fontWeight: "bold", marginBottom: "0.5rem", color: "#ddd" }}>
-                                                {journal.recordedDate} - {journal.description || "（摘要なし）"}
+                                                {journal.recordedDate}
+                                            </div>
+
+                                            <div style={{ fontWeight: "bold", marginBottom: "0.5rem", color: "#ddd" }}>
+                                                {journal.description || "（摘要なし）"}
                                             </div>
                                     
                                             {/* 明細の簡易表示 */}
                                             {journal.lines.map((l, i) => (
                                                 <div key={i} className={`flex justify-between ${l.side === Side.DEBIT ? "line-debit" : "line-credit"}`}>
                                                     <span>
-                                                        {`(${SideLabels[l.side]}) ${l.account.id} ${l.account.name} ${l.amount.toLocaleString()}}`}
+                                                        {`(${SideLabels[l.side]}) ${l.account.id} ${l.account.name} ${l.amount.toLocaleString()}`}
                                                     </span>
                                                 </div>
                                             ))}

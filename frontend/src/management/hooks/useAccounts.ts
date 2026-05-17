@@ -8,8 +8,13 @@ export function useAccounts() {
     fetcher
   );
 
+  const addBlankData = [
+    { id: "", name: "（未選択）", type: "" },
+    ...(data ?? []),
+  ];
+
   return {
-    accounts: data ?? [],
+    accounts: addBlankData,
     isLoading,
     error,
   };

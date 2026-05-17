@@ -18,6 +18,8 @@ type JournalFormProps = {
 };
 
 export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormProps) {
+  const isCreate = mode == "create";
+  
   const {
     register,
     control,
@@ -42,7 +44,7 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
   const creditSum = calcCreditSum(watchedLines);
 
   const onSubmit = async (data: JournalWithLinesForm) => {
-    if (mode === "create") {
+    if (isCreate) {
       await createJournal(data);
     } else {
       await reviseJournal(originalId!, data);
@@ -55,7 +57,11 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="container">
-      <h2>仕訳入力</h2>
+      {isCreate ? (
+        <h2>仕訳入力（新規）</h2>
+      ) : (
+        <h3>仕訳入力（訂正）</h3>
+      )}
       
       {/* ヘッダー情報 */}
       <div className="section row">
@@ -65,7 +71,7 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
           {errors.recordedDate && <p className="error-message">{errors.recordedDate.message}</p>}
         </div>
         <div>
-          <label className="label">摘要（全体）</label>
+          <label className="label">摘要</label>
           <input type="text" {...register("description")} className="input" />
         </div>
       </div>

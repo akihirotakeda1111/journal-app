@@ -85,9 +85,6 @@ export const JournalRow: React.FC<Props> = ({ journal, onMutate }) => {
             </div>
             {isEditing && (
                 <div className="edit-area">
-                    <h4>
-                        修正仕訳データの入力
-                    </h4>
                     <JournalForm
                         mode="revise"
                         originalId={journal.id}
