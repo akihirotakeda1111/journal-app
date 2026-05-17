@@ -82,6 +82,11 @@
   border: none;
 }
 
+.btn:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
 .btn-primary {
   width: 100%;
   background: #3a3a3a;
@@ -90,6 +95,7 @@
 
 .btn-primary:disabled {
   background: #555;
+  cursor: not-allowed;
 }
 
 .btn-link {

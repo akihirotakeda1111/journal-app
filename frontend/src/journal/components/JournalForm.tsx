@@ -6,6 +6,7 @@ import { createJournal, reviseJournal } from "@/utils/api/journal";
 import { useAccounts } from "@/management/hooks/useAccounts";
 import { Side, SideLabels } from "../constants/side";
 import { AmountRules } from "../constants/amountRules";
+import { JournalLineRules } from "../constants/journalLineRules";
 import { createJournalDefaultValues } from "../services/defaultValues";
 import { calcDebitSum, calcCreditSum } from "../services/calc";
 
@@ -94,7 +95,8 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
               </div>
             );
           })}
-          <button type="button" onClick={() => append({ side: Side.DEBIT, accountId: "", amount: 0 })} className="btn btn-link">
+          <button type="button" onClick={() => append({ side: Side.DEBIT, accountId: "", amount: 0 })}
+            disabled={fields.length >= JournalLineRules.MAX_ROW} className="btn btn-link">
             + {SideLabels[Side.DEBIT]}を追加
           </button>
         </div>
@@ -122,7 +124,8 @@ export function JournalForm({ mode, originalId, mutate, onDone }: JournalFormPro
               </div>
             );
           })}
-          <button type="button" onClick={() => append({ side: Side.CREDIT, accountId: "", amount: 0 })} className="btn btn-link">
+          <button type="button" onClick={() => append({ side: Side.CREDIT, accountId: "", amount: 0 })}
+            disabled={fields.length >= JournalLineRules.MAX_ROW}  className="btn btn-link">
             + {SideLabels[Side.CREDIT]}を追加
           </button>
         </div>
