@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { cancelJournal } from "@/utils/api/journal";
 import type { JournalWithLinesApi } from "../types";
 import { JournalForm } from "./JournalForm";
 import { JournalHistoryModal } from "./JournalHistoryModal";
@@ -15,6 +16,11 @@ export const JournalRow: React.FC<Props> = ({ journal, onMutate }) => {
 
     const debitLines = journal.lines.filter((l) => l.side === Side.DEBIT);
     const creditLines = journal.lines.filter((l) => l.side === Side.CREDIT);
+
+    const handleCancel = async () => {
+        await cancelJournal(journal.id);
+        onMutate()
+    };
 
     return (
         <div key={journal.id} className="row-container">
@@ -37,6 +43,12 @@ export const JournalRow: React.FC<Props> = ({ journal, onMutate }) => {
                         className={`btn ${isEditing ? "btn-edit-active" : "btn-edit"}`}
                     >
                         {isEditing ? "キャンセル" : "訂正"}
+                    </button>
+                    <button
+                        onClick={handleCancel}
+                        className="btn btn-cancel"
+                    >
+                        取消
                     </button>
                 </div>
             </div>

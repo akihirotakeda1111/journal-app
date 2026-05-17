@@ -51,6 +51,11 @@
   color: #ddd;
 }
 
+.btn-cancel {
+  background: #ff6b6b;
+  color: #ccc;
+}
+
 /* ====== Table ====== */
 .row-body {
   display: flex;

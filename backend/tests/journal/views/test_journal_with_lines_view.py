@@ -6,6 +6,7 @@ from journal.domain.constants import Side, JournalType
 from management.domain.constants import AccountType
 
 BASE_CREATE = "/api/journal/"
+BASE_CANCEL = "/api/journal/cancel/{journal_id}/"
 BASE_REVISE = "/api/journal/revise/{journal_id}/"
 BASE_LIST = "/api/journal/list/"
 BASE_HISTORY = "/api/journal/{journal_id}/history/"
@@ -38,8 +39,8 @@ def test_journal_with_lines_view_create(client):
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [
-            {"account_id": "A01", "side": Side.DEBIT, "amount": 100},
-            {"account_id": "A02", "side": Side.CREDIT, "amount": 100},
+            {"account_id": "T01", "side": Side.DEBIT, "amount": 100},
+            {"account_id": "T02", "side": Side.CREDIT, "amount": 100},
         ],
     }
 
@@ -62,6 +63,36 @@ def test_journal_with_lines_view_create(client):
         resp = client.post(BASE_CREATE, payload, format="json")
 
     mock_create.assert_called_once_with(payload)
+    assert resp.status_code == status.HTTP_201_CREATED
+    assert resp.json() == fake_journal
+
+
+def test_journal_with_lines_view_cancel(client):
+    """逆訂正リクエストが正常に処理され、レスポンスが返ること"""
+
+    journal_id_str = "11111111-1111-1111-1111-111111111111"
+    journal_id_uuid = UUID(journal_id_str)
+
+    fake_journal = {
+        "id": journal_id_str,
+        "recordedDate": "2026-01-01",
+        "description": "【取消】元仕訳",
+        "type": JournalType.CANCEL,
+        "lines": [
+            {"accountId": "T01", "side": Side.CREDIT, "amount": 200},
+            {"accountId": "T03", "side": Side.DEBIT, "amount": 200},
+        ],
+    }
+
+    output_path = "journal.views.journal_with_lines.JournalWithLinesOutputSerializer"
+    service_path = "journal.views.journal_with_lines.JournalWithLinesService.cancel"
+
+    with patch(output_path, new=DummyOutputSerializer), patch(
+        service_path, return_value=fake_journal
+    ) as mock_cancel:
+        resp = client.post(BASE_CANCEL.format(journal_id=journal_id_str), format="json")
+
+    mock_cancel.assert_called_once_with(journal_id_uuid)
     assert resp.status_code == status.HTTP_201_CREATED
     assert resp.json() == fake_journal
 

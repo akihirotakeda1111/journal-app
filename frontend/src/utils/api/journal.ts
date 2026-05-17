@@ -9,6 +9,12 @@ export async function createJournal(data: JournalWithLinesForm): Promise<Journal
   return res.data;
 }
 
+export async function cancelJournal(originalId: string): Promise<JournalWithLinesApi> {
+  const res = await apiClient.post(`/journal/cancel/${originalId}/`);
+
+  return res.data;
+}
+
 export async function reviseJournal(originalId: string, data: JournalWithLinesForm): Promise<JournalWithLinesForm> {
   const validated = JournalWithLinesFormSchema.parse(data);
   const res = await apiClient.post(`/journal/revise/${originalId}/`, validated);

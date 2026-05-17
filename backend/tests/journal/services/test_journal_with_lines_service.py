@@ -177,6 +177,54 @@ def test_create_duplicate_id(db, setup_accounts):
         JournalWithLinesService.create(data)
 
 
+def test_cancel_success(db, setup_accounts):
+    """逆仕訳が正しく生成される"""
+
+    asset, liability, expense, revenue = setup_accounts
+
+    # 元仕訳の作成
+    original = JournalWithLinesService.create(
+        {
+            "id": "33333333-3333-3333-3333-333333333333",
+            "recorded_date": "2026-01-01",
+            "description": "元仕訳",
+            "lines": [
+                {"account_id": asset.id, "amount": 500, "side": Side.DEBIT},
+                {"account_id": liability.id, "amount": 500, "side": Side.CREDIT},
+            ],
+        }
+    )
+    original_lines = list(JournalLine.objects.filter(journal=original))
+
+    cancel_journal = JournalWithLinesService.cancel(original.id)
+    cancel_journal_lines = list(JournalLine.objects.filter(journal=cancel_journal))
+    cancel = Journal.objects.get(type=JournalType.CANCEL)
+    cancel_lines = list(JournalLine.objects.filter(journal=cancel))
+
+    # 元仕訳、逆仕訳の2つが存在すること
+    assert Journal.objects.count() == 2
+
+    # 元仕訳と逆仕訳の明細行数が同じであること
+    assert len(original_lines) == len(cancel_lines)
+
+    # 逆仕訳が正しく保存されていること
+    assert cancel.type == JournalType.CANCEL
+    assert cancel.recorded_date == original.recorded_date
+    assert cancel.description == f"【取消】 {original.description}"
+
+    # 逆仕訳が元仕訳と紐づいていること
+    assert cancel.original_journal_id == original.id
+
+    # 元仕訳の明細と同じ勘定科目の逆仕訳の明細が存在すること
+    for original_line in original_lines:
+        cancel_line = next(
+            l for l in cancel_lines if l.account_id == original_line.account_id
+        )
+
+        # 金額が反転していること
+        assert cancel_line.amount == -original_line.amount
+
+
 def test_revise_success(db, setup_accounts):
     """逆仕訳と訂正仕訳が正しく生成される"""
 

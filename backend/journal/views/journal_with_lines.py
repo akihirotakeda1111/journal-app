@@ -22,6 +22,15 @@ class JournalWithLinesCreateAPIView(APIView):
         return Response(output.data, status=status.HTTP_201_CREATED)
 
 
+class JournalWithLinesCancelAPIView(APIView):
+    def post(self, request, journal_id):
+
+        journal = JournalWithLinesService.cancel(journal_id)
+
+        output = JournalWithLinesOutputSerializer(journal)
+        return Response(output.data, status=status.HTTP_201_CREATED)
+
+
 class JournalWithLinesReviseAPIView(APIView):
     def post(self, request, journal_id):
         input = JournalWithLinesInputSerializer(data=request.data)

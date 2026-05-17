@@ -48,6 +48,31 @@ class JournalWithLinesService:
         return data
 
     @staticmethod
+    def _create_cancel_journal(original_journal: Journal) -> Journal:
+        """元仕訳から逆仕訳を作成して返す"""
+
+        cancel_journal = Journal.objects.create(
+            id=uuid7(),
+            recorded_date=original_journal.recorded_date,
+            description=f"【取消】 {original_journal.description}",
+            type=JournalType.CANCEL,
+            original_journal=original_journal,
+        )
+
+        # 明細（逆仕訳）を作成
+        cancel_lines = [
+            JournalLine(
+                journal=cancel_journal,
+                account_id=line.account_id,
+                amount=-line.amount,
+            )
+            for line in original_journal.lines.all()
+        ]
+        JournalLine.objects.bulk_create(cancel_lines)
+
+        return cancel_journal
+
+    @staticmethod
     @transaction.atomic
     def create(data):
         data = JournalWithLinesService._clean(data)
@@ -98,6 +123,33 @@ class JournalWithLinesService:
 
     @staticmethod
     @transaction.atomic
+    def cancel(original_journal_id: str) -> Journal:
+        """逆仕訳の作成"""
+
+        try:
+            with transaction.atomic():
+                # 元の仕訳を取得
+                original_journal = (
+                    Journal.objects.select_for_update()
+                    .prefetch_related("lines")
+                    .get(id=original_journal_id)
+                )
+
+                # 逆仕訳の自動生成
+                cancel_journal = JournalWithLinesService._create_cancel_journal(
+                    original_journal
+                )
+
+                return cancel_journal
+
+        except Journal.DoesNotExist:
+            raise ValidationError("対象の仕訳が存在しません。")
+        except IntegrityError as e:
+            # OneToOne制約違反が起きた場合
+            raise ValidationError("この仕訳は既に取消されています。")
+
+    @staticmethod
+    @transaction.atomic
     def revise(original_journal_id: str, new_journal_data: dict) -> Journal:
         """逆仕訳、訂正仕訳の作成"""
         new_journal_data = JournalWithLinesService._clean(new_journal_data)
@@ -112,26 +164,9 @@ class JournalWithLinesService:
                 )
 
                 # 逆仕訳の自動生成
-                cancel_journal_id = uuid7()
-                cancel_journal = Journal.objects.create(
-                    id=cancel_journal_id,
-                    recorded_date=original_journal.recorded_date,
-                    description=f"【取消】 {original_journal.description}",
-                    type=JournalType.CANCEL,
-                    original_journal=original_journal,
+                cancel_journal = JournalWithLinesService._create_cancel_journal(
+                    original_journal
                 )
-
-                # 逆仕訳の明細自動生成（金額を反転）
-                cancel_lines = []
-                for line in original_journal.lines.all():
-                    cancel_lines.append(
-                        JournalLine(
-                            journal=cancel_journal,
-                            account_id=line.account_id,
-                            amount=-line.amount,
-                        )
-                    )
-                JournalLine.objects.bulk_create(cancel_lines)
 
                 # 訂正仕訳の作成
                 new_journal_id = new_journal_data["id"]
