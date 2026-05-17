@@ -8,11 +8,11 @@ import { buildTrialBalanceQuery } from "../services/query";
 import { calcBalances } from "../services/calc";
 
 export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
-    const [start, setStart] = useState("");
-    const [end, setEnd] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
 
     const query = useMemo(() => 
-        buildTrialBalanceQuery(start, end) + `&refresh=${refreshKey}`, [start, end, refreshKey]);
+        buildTrialBalanceQuery(startDate, endDate) + `&refresh=${refreshKey}`, [startDate, endDate, refreshKey]);
 
     const { data: balances, error, isLoading } = useSWR<TrialBalanceApi[]>(query, fetcher);
 
@@ -36,11 +36,11 @@ export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
                 <div className="tb-filter">
                     <label>
                         開始日:
-                        <input type="date" value={start} onChange={(e) => setStart(e.target.value)} />
+                        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                     </label>
                     <label>
                         終了日:
-                        <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
+                        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                     </label>
                 </div>
             </div>

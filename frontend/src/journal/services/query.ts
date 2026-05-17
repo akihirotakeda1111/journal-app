@@ -1,6 +1,6 @@
-export function buildTrialBalanceQuery(start?: string, end?: string) {
+export function buildTrialBalanceQuery(start_date?: string, end_date?: string) {
   const params = new URLSearchParams();
-  if (start) params.append("start", start);
-  if (end) params.append("end", end);
+  if (start_date) params.append("start_date", start_date);
+  if (end_date) params.append("end_date", end_date);
   return `/journal/trial_balance/?${params.toString()}`;
 }
