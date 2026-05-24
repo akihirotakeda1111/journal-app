@@ -26,7 +26,6 @@ erDiagram
         varchar id PK "勘定科目コード"
         text name "科目名"
         varchar type "ASSET / LIABILITY / EQUITY / REVENUE / EXPENSE"
-        boolean is_active "有効フラグ"
     }
 ```
 
