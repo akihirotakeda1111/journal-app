@@ -1,3 +1,5 @@
+# ER
+
 ```mermaid
 erDiagram
     journals ||--o{ journal_lines : "has many (1:N)"
@@ -26,4 +28,54 @@ erDiagram
         varchar type "ASSET / LIABILITY / EQUITY / REVENUE / EXPENSE"
         boolean is_active "有効フラグ"
     }
+```
+
+# Deployment
+
+## backend
+
+### migrate
+
+```bash
+ssh ec2-user@[EC2 Public DNS]
+cd journal-app
+docker-compose exec backend python manage.py makemigrations
+docker-compose exec backend python manage.py migrate
+docker-compose exec backend python manage.py loaddata account.json
+```
+
+### deploy
+
+```bash
+ssh ec2-user@[EC2 Public DNS]
+cd journal-app
+git pull origin main
+docker-compose up -d --build --no-deps backend
+```
+
+## frontend
+
+### deploy
+
+```bash
+cd journal-app/frontend
+sed -i 's|http://ec2-[^"]*|http://[EC2 Public DNS]:8000/api/|' src/utils/api/client.ts
+npm run build
+aws s3 sync dist/ s3://journal-app-react-s3-bucket --delete --region ap-northeast-1
+```
+
+## infra
+
+### apply
+
+```bash
+cd journal-app/infra
+terraform apply
+```
+
+### destroy
+
+```bash
+cd journal-app/infra
+terraform destroy
 ```
