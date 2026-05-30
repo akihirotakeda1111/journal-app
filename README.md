@@ -49,7 +49,7 @@ docker-compose exec backend python manage.py loaddata account.json
 ssh ec2-user@[EC2 Public DNS]
 cd journal-app
 git pull origin main
-docker-compose up -d --build --no-deps backend
+docker-compose -f docker-compose.dev.yml up -d --build backend
 ```
 
 ## frontend
@@ -58,7 +58,6 @@ docker-compose up -d --build --no-deps backend
 
 ```bash
 cd journal-app/frontend
-sed -i 's|http://ec2-[^"]*|http://[EC2 Public DNS]:8000/api/|' src/utils/api/client.ts
 npm run build
 aws s3 sync dist/ s3://journal-app-react-s3-bucket --delete --region ap-northeast-1
 ```
