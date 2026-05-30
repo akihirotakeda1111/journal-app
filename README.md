@@ -61,7 +61,11 @@ docker-compose -f docker-compose.dev.yml up -d --build backend
 ### deploy
 
 ```bash
-cd journal-app/frontend
+cd journal-app
+git fetch origin
+git reset --hard origin/main
+cd frontend
+sed -i 's|http://[^"]*|https://api.journal-app.a-t-dev.com/api/|' src/utils/api/client.ts
 npm run build
 aws s3 sync dist/ s3://journal-app-react-s3-bucket --delete --region ap-northeast-1
 ```
