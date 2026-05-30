@@ -1,5 +1,5 @@
-output "react_website_url" {
-    value = aws_s3_bucket_website_configuration.react.website_endpoint
+output "cloudfront_domain" {
+  value = aws_cloudfront_distribution.frontend.domain_name
 }
 
 output "rds_endpoint" {

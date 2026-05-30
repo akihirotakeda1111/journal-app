@@ -10,6 +10,12 @@ variable "project" {
     default     = "journal-app"
 }
 
+variable "domain_name" {
+    description = "Domain name"
+    type        = string
+    default     = "a-t-dev.com"
+}
+
 variable "ssh_allowed_ip" {
     description = "IP allowed to SSH into EC2"
     type        = string

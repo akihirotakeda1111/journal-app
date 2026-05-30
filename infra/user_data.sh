@@ -13,7 +13,7 @@ cd /home/ec2-user
 git clone https://github.com/akihirotakeda1111/journal-app.git
 sudo chown -R ec2-user:ec2-user journal-app
 cd journal-app
-sed -i "s/ALLOWED_HOSTS = .*/ALLOWED_HOSTS = ['*']/" backend/config/settings.py
+sed -i "s/ALLOWED_HOSTS = .*/ALLOWED_HOSTS = ['api.journal-app.a-t-dev.com']/" backend/config/settings.py
 
 # output .env
 echo "DB_HOST=${db_host}" >> .env
@@ -24,5 +24,5 @@ echo "POSTGRES_DB=${db_name}" >> .env
 echo "POSTGRES_USER=${db_user}" >> .env
 echo "POSTGRES_PASSWORD=${db_password}" >> .env
 
-# start backend only
-docker-compose up -d --build --no-deps backend
+# setup nginx
+bash setup_nginx.sh
