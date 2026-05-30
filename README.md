@@ -33,6 +33,54 @@ erDiagram
 
 <img src="./docs/images/infrastructure.png" width="800">
 
+# Local Development
+
+## 前提
+
+- Docker / Docker Compose
+- Node.js
+
+## セットアップ手順
+
+### 1. リポジトリクローン
+
+```bash
+git clone https://github.com/akihirotakeda1111/journal-app.git
+```
+
+### 2. 環境変数の設定
+
+ルートディレクトリに.envを作成する。
+（.env.exampleを参照）
+
+### 3. Docker(backend, db)の起動
+
+```bash
+cd journal-app
+docker compose up -d
+```
+
+### 4. DB構築
+
+```bash
+docker compose exec backend python manage.py makemigrations
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py loaddata account.json
+```
+
+### 5. frontendの起動
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## URL
+
+- frontend: http://localhost:5173/
+- backend: http://localhost:8000/api/
+
 # Deployment
 
 ## backend
