@@ -29,6 +29,10 @@ erDiagram
     }
 ```
 
+# Infrastructure
+
+<img src="./docs/images/infrastructure.png" width="800">
+
 # Deployment
 
 ## backend
