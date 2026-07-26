@@ -15,7 +15,7 @@ export async function fetchDownloadUrl(id: number) {
 
 export async function create(data: EvidenceForm): Promise<EvidenceForm> {
   const validated = EvidenceFormSchema.parse(data);
-  const res = await apiClient.post(`/journal/evidence/${validated.id}/`, validated);
+  const res = await apiClient.post(`/journal/evidence/${validated.journalId}/`, validated);
 
   return res.data;
 }
