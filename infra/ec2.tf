@@ -76,6 +76,30 @@ resource "aws_iam_role_policy_attachment" "s3_readonly" {
     policy_arn = aws_iam_policy.s3_readonly.arn
 }
 
+resource "aws_iam_policy" "uploads_s3_policy" {
+    name = "${var.project}-uploads-s3-policy"
+    description = "Allow EC2 to generate presigned URLs for file uploads"
+
+    policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+            {
+                Effect = "Allow"
+                Action = [
+                    "s3:PutObject",
+                    "s3:GetObject"
+                ]
+                Resource = "${aws_s3_bucket.uploads.arn}/*"
+            }
+        ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "uploads_s3_attach" {
+    role = aws_iam_role.ec2.name
+    policy_arn = aws_iam_policy.uploads_s3_policy.arn
+}
+
 resource "aws_iam_instance_profile" "ec2" {
     name = "${var.project}-ec2-instance-profile"
     role = aws_iam_role.ec2.name

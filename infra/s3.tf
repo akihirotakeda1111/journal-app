@@ -41,3 +41,48 @@ resource "aws_s3_bucket_policy" "react" {
         aws_s3_bucket_public_access_block.react
     ]
 }
+
+resource "aws_s3_bucket" "uploads" {
+    bucket = "${var.project}-file-uploads-s3-bucket"
+
+    tags = {
+        Name = "${var.project}-file-uploads-s3-bucket"
+    }
+}
+
+resource "aws_s3_bucket_policy" "uploads" {
+    bucket = aws_s3_bucket.uploads.id
+
+    policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+            {
+                Sid    = "AllowEC2Upload"
+                Effect = "Allow"
+                Principal = {
+                    AWS = aws_iam_role.ec2.arn
+                }
+                Action = [
+                    "s3:PutObject",
+                    "s3:GetObject"
+                ]
+                Resource = "${aws_s3_bucket.uploads.arn}/*"
+            }
+        ]
+    })
+}
+
+resource "aws_s3_bucket_cors_configuration" "uploads" {
+    bucket = aws_s3_bucket.uploads.id
+
+    cors_rule {
+        allowed_headers = ["*"]
+        allowed_methods = ["GET", "PUT", "POST"]
+        allowed_origins = [
+            "https://${var.domain_name}",
+            "http://localhost:5173"
+        ]
+        expose_headers  = ["ETag"]
+        max_age_seconds = 3000
+    }
+}
