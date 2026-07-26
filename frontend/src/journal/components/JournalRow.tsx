@@ -4,6 +4,7 @@ import type { JournalWithLinesApi } from "../types";
 import { JournalForm } from "./JournalForm";
 import { JournalHistoryModal } from "./JournalHistoryModal";
 import { Side } from "../constants/side";
+import { EvidenceUploader } from "./EvidenceUploader";
 
 interface Props {
   journal: JournalWithLinesApi;
@@ -26,30 +27,35 @@ export const JournalRow: React.FC<Props> = ({ journal, onMutate }) => {
         <div key={journal.id} className="row-container">
             {/* ヘッダー */}
             <div className="row-header">
-                <div className="row-header-left">
-                    <span className="row-header-date">{journal.recordedDate}</span>
-                    <span className="row-header-desc">{journal.description || "（摘要なし）"}</span>
+                <div className="row-header-top">
+                    <div className="row-header-left">
+                        <span className="row-header-date">{journal.recordedDate}</span>
+                        <span className="row-header-desc">{journal.description || "（摘要なし）"}</span>
+                    </div>
+                    <div className="row-header-left">
+                        <span className="row-header-id">ID: {journal.id}</span>
+                        <button
+                            onClick={() => setIsHistoryOpen(true)}
+                            className="btn btn-history"
+                        >
+                            履歴
+                        </button>
+                        <button
+                            onClick={() => setIsEditing(!isEditing)}
+                            className={`btn ${isEditing ? "btn-edit-active" : "btn-edit"}`}
+                        >
+                            {isEditing ? "キャンセル" : "訂正"}
+                        </button>
+                        <button
+                            onClick={handleCancel}
+                            className="btn btn-cancel"
+                        >
+                            取消
+                        </button>
+                    </div>
                 </div>
-                <div className="row-header-left">
-                    <span className="row-header-id">ID: {journal.id}</span>
-                    <button
-                        onClick={() => setIsHistoryOpen(true)}
-                        className="btn btn-history"
-                    >
-                        履歴
-                    </button>
-                    <button
-                        onClick={() => setIsEditing(!isEditing)}
-                        className={`btn ${isEditing ? "btn-edit-active" : "btn-edit"}`}
-                    >
-                        {isEditing ? "キャンセル" : "訂正"}
-                    </button>
-                    <button
-                        onClick={handleCancel}
-                        className="btn btn-cancel"
-                    >
-                        取消
-                    </button>
+                <div className="row-header-bottom">
+                    <EvidenceUploader journalId={journal.id} />
                 </div>
             </div>
 

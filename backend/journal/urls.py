@@ -6,7 +6,13 @@ from journal.views.journal_with_lines import (
     JournalWithLinesListAPIView,
     JournalWithLinesHistoryAPIView,
 )
-from .views.trial_balance import TrialBalanceAPIView
+from journal.views.trial_balance import TrialBalanceAPIView
+from journal.views.evidence_upload import EvidenceUploadAPIView
+from journal.views.evidence_download import EvidenceDownloadAPIView
+from journal.views.evidence import (
+    JournalEvidenceCreateAPIView,
+    JournalEvidenceListAPIView,
+)
 
 urlpatterns = [
     path("journal/", JournalWithLinesCreateAPIView.as_view()),
@@ -17,4 +23,13 @@ urlpatterns = [
         "journal/<uuid:journal_id>/history/", JournalWithLinesHistoryAPIView.as_view()
     ),
     path("journal/trial_balance/", TrialBalanceAPIView.as_view()),
+    path("journal/evidence/upload/", EvidenceUploadAPIView.as_view()),
+    path(
+        "journal/evidence/download/<int:evidence_id>/",
+        EvidenceDownloadAPIView.as_view(),
+    ),
+    path("journal/evidence/<uuid:journal_id>/", JournalEvidenceCreateAPIView.as_view()),
+    path(
+        "journal/evidence/list/<uuid:journal_id>/", JournalEvidenceListAPIView.as_view()
+    ),
 ]

@@ -2,6 +2,7 @@ import React from "react";
 import { useJournalHistory } from "../hooks/useJournalHistory";
 import { Side, SideLabels } from "../constants/side";
 import { JournalType, JournalTypeLabels } from "../constants/journalType";
+import { EvidenceList } from "../components/EvidenceList";
 
 interface Props {
     journalId: string;
@@ -74,6 +75,9 @@ export const JournalHistoryModal: React.FC<Props> = ({ journalId, onClose }) => 
                                                     </span>
                                                 </div>
                                             ))}
+                                            
+                                            {/* 証憑一覧 */}
+                                            <EvidenceList journalId={journal.id} />
                                         </div>
                                     </div>
                                 );
