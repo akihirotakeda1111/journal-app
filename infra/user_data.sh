@@ -23,6 +23,7 @@ echo "DB_PASSWORD=${db_password}" >> .env
 echo "POSTGRES_DB=${db_name}" >> .env
 echo "POSTGRES_USER=${db_user}" >> .env
 echo "POSTGRES_PASSWORD=${db_password}" >> .env
+echo "AWS_S3_UPLOAD_BUCKET=${s3_upload_bucket}" >> .env
 
 # setup nginx
 bash setup_nginx.sh

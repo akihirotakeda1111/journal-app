@@ -1,5 +1,5 @@
 resource "aws_instance" "django" {
-    ami = "ami-0c3fd0f5d33134a76"
+    ami = "ami-0f36dcfcc94112ea1"
     instance_type = "t3.small"
     subnet_id = aws_subnet.public.id
     vpc_security_group_ids = [aws_security_group.ec2.id]
@@ -7,11 +7,18 @@ resource "aws_instance" "django" {
     key_name = aws_key_pair.app_key.key_name
     iam_instance_profile = aws_iam_instance_profile.ec2.name
 
+    metadata_options {
+        http_endpoint               = "enabled"
+        http_tokens                 = "optional"
+        http_put_response_hop_limit = 2
+    }
+
     user_data = templatefile("${path.module}/user_data.sh", {
         db_host = aws_db_instance.postgres.address
         db_name = var.db_name
         db_user = var.db_user
         db_password = var.db_password
+        s3_upload_bucket = aws_s3_bucket.uploads.bucket
     })
 
     tags = {

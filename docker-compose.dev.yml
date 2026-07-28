@@ -9,7 +9,6 @@ services:
       - "8000"
     env_file:
       - .env
-    network_mode: "host"
 
   nginx:
     image: nginx:alpine

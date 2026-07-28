@@ -79,7 +79,7 @@ resource "aws_s3_bucket_cors_configuration" "uploads" {
         allowed_headers = ["*"]
         allowed_methods = ["GET", "PUT", "POST"]
         allowed_origins = [
-            "https://${var.domain_name}",
+            "https://${var.project}.${var.domain_name}",
             "http://localhost:5173"
         ]
         expose_headers  = ["ETag"]
