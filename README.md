@@ -3,8 +3,10 @@
 ```mermaid
 erDiagram
     journals ||--o{ journal_lines : "has many (1:N)"
+    journals ||--o{ evidence : "has many (1:N)"
     journals |o--o| journals : "cancels/modifies (1:1 自己参照)"
     accounts ||--o{ journal_lines : "used in (1:N)"
+
 
     journals {
         uuid id PK
@@ -20,6 +22,13 @@ erDiagram
         uuid journal_id FK "仕訳ID"
         varchar account_id FK "勘定科目ID"
         numeric amount "金額（符号付き: 借方+, 貸方-）"
+    }
+
+    evidence {
+        bigserial id PK
+        uuid journal_id FK "仕訳ID"
+        varchar key "保存・参照キー"
+        timestamp uploaded_at "アップロード日時"
     }
 
     accounts {
