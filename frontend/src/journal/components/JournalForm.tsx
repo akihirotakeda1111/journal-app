@@ -1,7 +1,9 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { JournalWithLinesFormSchema } from "../schemas";
-import type { JournalWithLinesForm } from "../types";
+import {
+  JournalWithLinesFormSchema,
+  type JournalWithLinesForm,
+} from "../schemas";
 import { createJournal, reviseJournal } from "@/utils/api/journal";
 import { useAccounts } from "@/management/hooks/useAccounts";
 import { Side, SideLabels } from "../constants/side";

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Side } from "../constants/side";
+import { SideSchema } from "./_shared";
 import { AccountType } from "@/management/constants/accountType";
 
 export const TrialBalanceApiSchema = z.object({
@@ -13,5 +13,7 @@ export const TrialBalanceApiSchema = z.object({
     AccountType.EXPENSE,
   ]),
   balance: z.number(),
-  side: z.enum([Side.DEBIT, Side.CREDIT]),
+  side: SideSchema,
 });
+
+export type TrialBalanceApi = z.infer<typeof TrialBalanceApiSchema>;

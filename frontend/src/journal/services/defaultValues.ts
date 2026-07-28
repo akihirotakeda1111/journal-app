@@ -1,5 +1,5 @@
 import { uuidv7 } from "uuidv7";
-import type { JournalWithLinesForm } from "../types";
+import type { JournalWithLinesForm } from "../schemas";
 import { Side } from "../constants/side";
 
 export const createJournalDefaultValues = (): JournalWithLinesForm => ({

@@ -1,4 +1,2 @@
-import { z } from "zod";
-import { TrialBalanceApiSchema } from "../schemas/trialBalance";
-
-export type TrialBalanceApi = z.infer<typeof TrialBalanceApiSchema>;
+/** @deprecated Import from '@/journal/schemas' instead */
+export type { TrialBalanceApi } from "../schemas/trialBalance";

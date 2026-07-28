@@ -2,16 +2,16 @@ import { z } from "zod";
 import { JournalFormSchema, JournalApiSchema } from "./journal";
 import { JournalLineFormSchema, JournalLineApiSchema } from "./journalLine";
 import { Side, SideLabels } from "../constants/side";
-import type { JournalLineForm } from "../types/journalLine";
 
+type JournalLineForm = z.input<typeof JournalLineFormSchema>;
 
 export const JournalWithLinesFormSchema = JournalFormSchema.extend({
-    lines: z.array(JournalLineFormSchema)
+  lines: z
+    .array(JournalLineFormSchema)
     .min(2, `${SideLabels[Side.DEBIT]}と${SideLabels[Side.CREDIT]}にそれぞれ1行以上必要です`),
 }).superRefine((data, ctx) => {
-  const lines = data.lines as unknown as JournalLineForm[];
+  const lines = data.lines as JournalLineForm[];
 
-  // 数値以外はエラー
   lines.forEach((l, i) => {
     if (l.amount === undefined) {
       ctx.addIssue({
@@ -19,12 +19,10 @@ export const JournalWithLinesFormSchema = JournalFormSchema.extend({
         message: "金額を入力してください",
         path: ["lines", i, "amount"],
       });
-      // 計算できないため処理終了
-      return
+      return;
     }
   });
-  
-  // 貸借合計値を計算
+
   const toNum = (v: JournalLineForm["amount"]): number => {
     if (typeof v === "number" && Number.isFinite(v)) return Math.trunc(v);
     const n = Number(v);
@@ -39,7 +37,6 @@ export const JournalWithLinesFormSchema = JournalFormSchema.extend({
     .filter((l) => l.side === Side.CREDIT)
     .reduce((sum, l) => sum + toNum(l.amount), 0);
 
-    // 一致しない場合エラー
   if (debitSum !== creditSum) {
     ctx.addIssue({
       code: "custom",
@@ -49,6 +46,9 @@ export const JournalWithLinesFormSchema = JournalFormSchema.extend({
   }
 });
 
-export const JournalWithLinesApiSchema  = JournalApiSchema.extend({
+export const JournalWithLinesApiSchema = JournalApiSchema.extend({
   lines: z.array(JournalLineApiSchema),
 });
+
+export type JournalWithLinesForm = z.input<typeof JournalWithLinesFormSchema>;
+export type JournalWithLinesApi = z.output<typeof JournalWithLinesApiSchema>;

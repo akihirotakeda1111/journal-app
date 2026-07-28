@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchEvidenceList } from "@/utils/api/evidence";
-import type { EvidenceApi } from "../types";
+import type { EvidenceApi } from "../schemas";
 import { fetchDownloadUrl } from "@/utils/api/evidence";
 import { download } from "@/utils/download";
 

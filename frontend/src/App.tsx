@@ -7,8 +7,13 @@ import { JournalForm } from "./journal/components/JournalForm";
 import { JournalList } from "./journal/components/JournalList";
 import { TrialBalance } from "./journal/components/TrialBalance";
 import useSWR from "swr";
-import { fetcher } from "./utils/fetcher";
-import type { JournalWithLinesApi } from "./journal/types";
+import { createValidatedArrayFetcher } from "./utils/api/fetchValidated";
+import {
+  JournalWithLinesApiSchema,
+  type JournalWithLinesApi,
+} from "./journal/schemas";
+
+const fetchJournals = createValidatedArrayFetcher(JournalWithLinesApiSchema);
 
 function App() {
   const [activeTab, setActiveTab] = useState<"journal" | "trial">("journal");
@@ -21,7 +26,7 @@ function App() {
 
   const { data: journals, error, isLoading, mutate } = useSWR<JournalWithLinesApi[]>(
     "/journal/list/",
-    fetcher
+    fetchJournals
   );
 
   if (isLoading) return <div>読み込み中...</div>;

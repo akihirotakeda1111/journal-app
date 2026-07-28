@@ -1,5 +1,2 @@
-import { z } from "zod";
-import { EvidenceFormSchema, EvidenceApiSchema } from "../schemas/evidence";
-
-export type EvidenceForm = z.infer<typeof EvidenceFormSchema>;
-export type EvidenceApi = z.infer<typeof EvidenceApiSchema>;
+/** @deprecated Import from '@/journal/schemas' instead */
+export type { EvidenceForm, EvidenceApi } from "../schemas/evidence";

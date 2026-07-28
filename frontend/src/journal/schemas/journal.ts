@@ -1,17 +1,21 @@
 import { z } from "zod";
+import { RecordedDateSchema } from "./_shared";
 
 export const JournalBaseSchema = z.object({
-  recordedDate: z.string()
-    .min(1, "計上日は必須です")
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DDの形式で入力してください"),
+  recordedDate: RecordedDateSchema,
   description: z.string().optional(),
+});
+
+const JournalServerFieldsSchema = z.object({
+  id: z.string(),
+  type: z.string(),
 });
 
 export const JournalFormSchema = JournalBaseSchema.extend({
   id: z.string().optional(),
 });
 
-export const JournalApiSchema = JournalBaseSchema.extend({
-  id: z.string(),
-  type: z.string(),
-});
+export const JournalApiSchema = JournalBaseSchema.merge(JournalServerFieldsSchema);
+
+export type JournalForm = z.infer<typeof JournalFormSchema>;
+export type JournalApi = z.infer<typeof JournalApiSchema>;

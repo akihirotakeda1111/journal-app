@@ -1,6 +1,2 @@
-export * from "./journal";
-export * from "./journalLine";
-export * from "./journalWithLines";
-export * from "./trialBalance";
-export * from "./journalHistory";
-export * from "./evidence";
+/** @deprecated Import from '@/journal/schemas' instead */
+export * from "../schemas";

@@ -1,11 +1,13 @@
 import useSWR from "swr";
-import { fetcher } from "@/utils/fetcher";
-import type { AccountApi } from "../types/account";
+import { createValidatedArrayFetcher } from "@/utils/api/fetchValidated";
+import { AccountApiSchema, type AccountApi } from "../schemas";
+
+const fetchAccounts = createValidatedArrayFetcher(AccountApiSchema);
 
 export function useAccounts() {
   const { data, error, isLoading } = useSWR<AccountApi[]>(
     "/management/account/list/",
-    fetcher
+    fetchAccounts
   );
 
   const addBlankData = [

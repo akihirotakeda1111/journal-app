@@ -1,5 +1,4 @@
-import type { JournalLineForm } from "../types";
-import type { TrialBalanceApi } from "../types/trialBalance";
+import type { JournalLineForm, TrialBalanceApi } from "../schemas";
 import { Side } from "../constants/side";
 
 export const calcDebitSum = (lines: JournalLineForm[]) =>

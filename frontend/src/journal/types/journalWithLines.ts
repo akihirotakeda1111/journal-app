@@ -1,5 +1,2 @@
-import { z } from "zod";
-import { JournalWithLinesFormSchema, JournalWithLinesApiSchema } from "../schemas/journalWithLines";
-
-export type JournalWithLinesForm = z.input<typeof JournalWithLinesFormSchema>;
-export type JournalWithLinesApi = z.output<typeof JournalWithLinesApiSchema>;
+/** @deprecated Import from '@/journal/schemas' instead */
+export type { JournalWithLinesForm, JournalWithLinesApi } from "../schemas/journalWithLines";

@@ -1,6 +1,10 @@
 import { apiClient } from "./client";
-import { EvidenceFormSchema, EvidenceApiSchema } from "@/journal/schemas/evidence";
-import type { EvidenceForm, EvidenceApi } from "@/journal/types/evidence";
+import {
+  EvidenceFormSchema,
+  EvidenceApiSchema,
+  type EvidenceForm,
+  type EvidenceApi,
+} from "@/journal/schemas";
 
 export async function requestPresignedUrl(filename: string, contentType: string) {
   const res = await apiClient.post(`/journal/evidence/upload/`, JSON.stringify({ filename, content_type: contentType, category: "evidence", }));
@@ -13,11 +17,11 @@ export async function fetchDownloadUrl(id: number) {
   return res.data.url as string;
 }
 
-export async function create(data: EvidenceForm): Promise<EvidenceForm> {
+export async function create(data: EvidenceForm): Promise<EvidenceApi> {
   const validated = EvidenceFormSchema.parse(data);
   const res = await apiClient.post(`/journal/evidence/${validated.journalId}/`, validated);
 
-  return res.data;
+  return EvidenceApiSchema.parse(res.data);
 }
 
 export async function fetchEvidenceList(journalId: string): Promise<EvidenceApi[]> {

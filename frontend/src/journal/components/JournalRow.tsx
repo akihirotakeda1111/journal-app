@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { cancelJournal } from "@/utils/api/journal";
-import type { JournalWithLinesApi } from "../types";
+import type { JournalWithLinesApi } from "../schemas";
 import { JournalForm } from "./JournalForm";
 import { JournalHistoryModal } from "./JournalHistoryModal";
 import { Side } from "../constants/side";

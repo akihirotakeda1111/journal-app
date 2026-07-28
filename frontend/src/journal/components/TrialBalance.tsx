@@ -1,11 +1,16 @@
 import "@/styles/trialBalance.css";
 import { useMemo, useState } from "react";
 import useSWR from "swr";
-import { fetcher } from "@/utils/fetcher";
-import type { TrialBalanceApi } from "../types";
+import { createValidatedArrayFetcher } from "@/utils/api/fetchValidated";
+import {
+  TrialBalanceApiSchema,
+  type TrialBalanceApi,
+} from "../schemas";
 import { Side, SideLabels } from "../constants/side";
 import { buildTrialBalanceQuery } from "../services/query";
 import { calcBalances } from "../services/calc";
+
+const fetchTrialBalance = createValidatedArrayFetcher(TrialBalanceApiSchema);
 
 export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
     const [startDate, setStartDate] = useState("");
@@ -14,7 +19,7 @@ export const TrialBalance = ({ refreshKey }: { refreshKey: number }) => {
     const query = useMemo(() => 
         buildTrialBalanceQuery(startDate, endDate) + `&refresh=${refreshKey}`, [startDate, endDate, refreshKey]);
 
-    const { data: balances, error, isLoading } = useSWR<TrialBalanceApi[]>(query, fetcher);
+    const { data: balances, error, isLoading } = useSWR<TrialBalanceApi[]>(query, fetchTrialBalance);
 
     const { totalDebit, totalCredit, isBalanced } = useMemo(() => {
         if (!balances) return { totalDebit: 0, totalCredit: 0, isBalanced: true };

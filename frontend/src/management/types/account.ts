@@ -1,4 +1,2 @@
-import { z } from "zod";
-import { AccountApiSchema } from "../schemas/account";
-
-export type AccountApi = z.infer<typeof AccountApiSchema>;
+/** @deprecated Import from '@/management/schemas' instead */
+export type { AccountApi } from "../schemas/account";
