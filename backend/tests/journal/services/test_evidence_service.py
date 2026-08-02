@@ -1,9 +1,16 @@
 import pytest
 from django.utils import timezone
+from unittest.mock import patch
+from django.db import IntegrityError
 
 from journal.models.journal import Journal
 from journal.models.evidence import Evidence
 from journal.services.evidence import EvidenceService
+from journal.exceptions.journal_exceptions import (
+    JournalNotFoundError,
+    InvalidJournalIdError,
+    EvidenceCreateError,
+)
 
 
 def test_create_success(db):
@@ -27,8 +34,35 @@ def test_create_success(db):
 def test_create_invalid_journal(db):
     invalid_uuid = "11111111-1111-1111-1111-111111111112"
 
-    with pytest.raises(Journal.DoesNotExist):
+    with pytest.raises(JournalNotFoundError):
         EvidenceService.create(invalid_uuid, "evidence/test.pdf")
+
+
+def test_create_invalid_uuid(db):
+    invalid_uuid = "not-a-uuid"
+
+    with pytest.raises(InvalidJournalIdError):
+        EvidenceService.create(invalid_uuid, "evidence/test.pdf")
+
+
+def test_create_integrity_error(db):
+    journal = Journal.objects.create(
+        id="11111111-1111-1111-1111-111111111111",
+        description="test",
+        recorded_date=timezone.now(),
+    )
+
+    with patch("journal.models.evidence.Evidence.objects.create") as mocked_create:
+        mocked_create.side_effect = IntegrityError("Mocked IntegrityError")
+
+        with pytest.raises(EvidenceCreateError) as excinfo:
+            EvidenceService.create(
+                journal_id="11111111-1111-1111-1111-111111111111",
+                key="evidence/test.pdf",
+            )
+
+        assert "Mocked IntegrityError" in str(excinfo.value)
+        assert excinfo.value.code == "EVIDENCE_CREATE_FAILED"
 
 
 def test_list(db):
