@@ -1,14 +1,15 @@
-class BaseDomainError(Exception):
-    """仕訳に関する業務エラーの基底クラス"""
+from utils.exceptions.application_errors import (
+    ApplicationError,
+    ApplicationValidationError,
+    ConflictError,
+    RecordNotFoundError,
+)
 
-    def __init__(self, message: str, code: str = None):
-        super().__init__(message)
-        self.code = code
-
-    pass
+# 後方互換のため BaseDomainError を ApplicationError のエイリアスとして維持
+BaseDomainError = ApplicationError
 
 
-class JournalNotFoundError(BaseDomainError):
+class JournalNotFoundError(RecordNotFoundError):
     """Journalが存在しない場合"""
 
     def __init__(self, journal_id: str):
@@ -18,7 +19,7 @@ class JournalNotFoundError(BaseDomainError):
         )
 
 
-class InvalidJournalIdError(BaseDomainError):
+class InvalidJournalIdError(ApplicationValidationError):
     """InvalidなJournal IDの場合"""
 
     def __init__(self, journal_id: str):
@@ -28,7 +29,7 @@ class InvalidJournalIdError(BaseDomainError):
         )
 
 
-class JournalAlreadyExistsError(BaseDomainError):
+class JournalAlreadyExistsError(ConflictError):
     """冪等性チェックに引っかかった（既に処理済み）場合のドメイン例外"""
 
     def __init__(self, journal_id: str):
@@ -37,28 +38,48 @@ class JournalAlreadyExistsError(BaseDomainError):
             code="JOURNAL_ALREADY_EXISTS",
         )
 
-    pass
 
-
-class CancelAlreadyExistsError(BaseDomainError):
+class CancelAlreadyExistsError(ConflictError):
     """取消仕訳がすでに存在する"""
 
-    pass
+    def __init__(self, journal_id: str):
+        super().__init__(
+            message=f"Journal {journal_id} is already cancelled.",
+            code="CANCEL_ALREADY_EXISTS",
+        )
 
 
-class InvalidCancelTargetError(BaseDomainError):
+class JournalAlreadyModifiedError(ConflictError):
+    """仕訳が既に修正・取消されている"""
+
+    def __init__(self, journal_id: str):
+        super().__init__(
+            message=f"Journal {journal_id} is already modified or cancelled.",
+            code="JOURNAL_ALREADY_MODIFIED",
+        )
+
+
+class InvalidCancelTargetError(ApplicationValidationError):
     """CANCEL の対象が不正"""
 
-    pass
+    def __init__(self, journal_id: str, reason: str):
+        super().__init__(
+            message=f"Invalid cancel target {journal_id}: {reason}",
+            code="INVALID_CANCEL_TARGET",
+        )
 
 
-class PeriodClosedError(BaseDomainError):
+class PeriodClosedError(ConflictError):
     """月次締め後のため操作不可"""
 
-    pass
+    def __init__(self, period: str):
+        super().__init__(
+            message=f"Period {period} is closed.",
+            code="PERIOD_CLOSED",
+        )
 
 
-class EvidenceCreateError(BaseDomainError):
+class EvidenceCreateError(ApplicationValidationError):
     """Evidenceの作成に失敗した場合"""
 
     def __init__(self, key: str, original_message: str):

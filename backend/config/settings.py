@@ -77,7 +77,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 REST_FRAMEWORK = {
-    "EXCEPTION_HANDLER": "journal.exceptions.custom_domain_exception_handler.custom_domain_exception_handler",
+    "EXCEPTION_HANDLER": "utils.exceptions.exception_handler.custom_exception_handler",
     "DEFAULT_RENDERER_CLASSES": [
         "utils.camelcase.CamelCaseJSONRenderer",
     ],

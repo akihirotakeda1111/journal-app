@@ -1,9 +1,14 @@
 import pytest
-from django.core.exceptions import ValidationError
 from journal.services.journal_with_lines import JournalWithLinesService
 from journal.models import Journal, JournalLine
 from journal.domain.constants import AmountRules, JournalType, Side
-from journal.exceptions.journal_exceptions import JournalAlreadyExistsError
+from journal.exceptions.journal_exceptions import (
+    CancelAlreadyExistsError,
+    JournalAlreadyExistsError,
+    JournalAlreadyModifiedError,
+    JournalNotFoundError,
+)
+from utils.exceptions.application_errors import ApplicationValidationError
 from uuid import UUID
 from datetime import date, datetime, timedelta
 from django.utils import timezone
@@ -32,7 +37,7 @@ def test_clean_success():
 
 
 def test_clean_missing_id():
-    """id がない場合、ValidationErrorが発生すること"""
+    """id がない場合、ApplicationValidationErrorが発生すること"""
     data = {
         "recorded_date": "2026-01-01",
         "lines": [
@@ -40,12 +45,12 @@ def test_clean_missing_id():
             {"account_id": 2, "amount": 100, "side": Side.CREDIT},
         ],
     }
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApplicationValidationError):
         JournalWithLinesService._clean(data)
 
 
 def test_clean_missing_recorded_date():
-    """recorded_date がない場合、ValidationErrorが発生すること"""
+    """recorded_date がない場合、ApplicationValidationErrorが発生すること"""
     data = {
         "id": "11111111-1111-1111-1111-111111111111",
         "lines": [
@@ -53,23 +58,23 @@ def test_clean_missing_recorded_date():
             {"account_id": 2, "amount": 100, "side": Side.CREDIT},
         ],
     }
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApplicationValidationError):
         JournalWithLinesService._clean(data)
 
 
 def test_clean_empty_lines():
-    """lines が空の場合、ValidationErrorが発生すること"""
+    """lines が空の場合、ApplicationValidationErrorが発生すること"""
     data = {
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [],
     }
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApplicationValidationError):
         JournalWithLinesService._clean(data)
 
 
 def test_clean_missing_account_id():
-    """account_id がない場合、ValidationErrorが発生すること"""
+    """account_id がない場合、ApplicationValidationErrorが発生すること"""
     data = {
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
@@ -78,12 +83,12 @@ def test_clean_missing_account_id():
             {"amount": 100, "side": Side.CREDIT},
         ],
     }
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApplicationValidationError):
         JournalWithLinesService._clean(data)
 
 
 def test_clean_missing_amount():
-    """amount がない場合、ValidationErrorが発生すること"""
+    """amount がない場合、ApplicationValidationErrorが発生すること"""
     data = {
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
@@ -92,12 +97,12 @@ def test_clean_missing_amount():
             {"account_id": 2, "side": Side.CREDIT},
         ],
     }
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApplicationValidationError):
         JournalWithLinesService._clean(data)
 
 
 def test_clean_invalid_side():
-    """side が無効な値の場合、ValidationErrorが発生すること"""
+    """side が無効な値の場合、ApplicationValidationErrorが発生すること"""
     data = {
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
@@ -106,7 +111,7 @@ def test_clean_invalid_side():
             {"account_id": 2, "amount": 100, "side": "INVALID"},
         ],
     }
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApplicationValidationError):
         JournalWithLinesService._clean(data)
 
 
@@ -145,14 +150,14 @@ def test_create_success(db, setup_accounts):
 
 
 def test_create_clean_validation(db):
-    """仕訳入力データの検証に失敗した場合、ValidationErrorが発生する"""
+    """仕訳入力データの検証に失敗した場合、ApplicationValidationErrorが発生する"""
     data = {
         "id": "11111111-1111-1111-1111-111111111111",
         "recorded_date": "2026-01-01",
         "lines": [],
     }
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApplicationValidationError):
         JournalWithLinesService.create(data)
 
 
@@ -223,6 +228,31 @@ def test_cancel_success(db, setup_accounts):
 
         # 金額が反転していること
         assert cancel_line.amount == -original_line.amount
+
+
+def test_cancel_not_found(db):
+    """存在しないIDが指定された場合、JournalNotFoundError"""
+    with pytest.raises(JournalNotFoundError):
+        JournalWithLinesService.cancel("99999999-9999-9999-9999-999999999999")
+
+
+def test_cancel_already_cancelled(db, setup_accounts):
+    """二重取消の場合、CancelAlreadyExistsError"""
+    asset, liability, expense, revenue = setup_accounts
+    original = JournalWithLinesService.create(
+        {
+            "id": "dddddddd-dddd-dddd-dddd-dddddddddddd",
+            "recorded_date": "2026-01-01",
+            "lines": [
+                {"account_id": asset.id, "amount": 100, "side": Side.DEBIT},
+                {"account_id": liability.id, "amount": 100, "side": Side.CREDIT},
+            ],
+        }
+    )
+    JournalWithLinesService.cancel(original.id)
+
+    with pytest.raises(CancelAlreadyExistsError):
+        JournalWithLinesService.cancel(original.id)
 
 
 def test_revise_success(db, setup_accounts):
@@ -302,7 +332,7 @@ def test_revise_success(db, setup_accounts):
 
 
 def test_revise_clean_validation(db, setup_accounts):
-    """訂正仕訳入力データの検証に失敗した場合、ValidationErrorが発生する"""
+    """訂正仕訳入力データの検証に失敗した場合、ApplicationValidationErrorが発生する"""
 
     asset, liability, expense, revenue = setup_accounts
 
@@ -319,18 +349,27 @@ def test_revise_clean_validation(db, setup_accounts):
         "lines": [],
     }
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ApplicationValidationError):
         JournalWithLinesService.revise(original.id, new_data)
 
 
-def test_revise_not_found(db):
-    """存在しないIDが指定された場合、ValidationError"""
-    with pytest.raises(ValidationError):
-        JournalWithLinesService.revise("99999999-9999-9999-9999-999999999999", {})
+def test_revise_not_found(db, setup_accounts):
+    """存在しないIDが指定された場合、JournalNotFoundError"""
+    asset, liability, expense, revenue = setup_accounts
+    new_data = {
+        "id": "22222222-2222-2222-2222-222222222222",
+        "recorded_date": "2026-01-01",
+        "lines": [
+            {"account_id": asset.id, "amount": 100, "side": Side.DEBIT},
+            {"account_id": liability.id, "amount": 100, "side": Side.CREDIT},
+        ],
+    }
+    with pytest.raises(JournalNotFoundError):
+        JournalWithLinesService.revise("99999999-9999-9999-9999-999999999999", new_data)
 
 
 def test_revise_double_revise(db, setup_accounts):
-    """訂正済みの仕訳を再度訂正した場合、ValidationError"""
+    """訂正済みの仕訳を再度訂正した場合、JournalAlreadyModifiedError"""
 
     asset, liability, expense, revenue = setup_accounts
 
@@ -358,7 +397,7 @@ def test_revise_double_revise(db, setup_accounts):
     JournalWithLinesService.revise(original.id, new_data)
 
     # 2回目：エラー
-    with pytest.raises(ValidationError):
+    with pytest.raises(JournalAlreadyModifiedError):
         JournalWithLinesService.revise(original.id, new_data)
 
 
