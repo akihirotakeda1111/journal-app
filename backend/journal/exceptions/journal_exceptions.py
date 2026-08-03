@@ -5,7 +5,7 @@ from utils.exceptions.application_errors import (
     RecordNotFoundError,
 )
 
-# 後方互換のため BaseDomainError を ApplicationError のエイリアスとして維持
+# 後方互換のため ApplicationError のエイリアスとして維持
 BaseDomainError = ApplicationError
 
 
@@ -86,4 +86,14 @@ class EvidenceCreateError(ApplicationValidationError):
         super().__init__(
             message=f"Failed to create evidence with key: {key}. Error: {original_message}",
             code="EVIDENCE_CREATE_FAILED",
+        )
+
+
+class EvidenceNotFoundError(RecordNotFoundError):
+    """Evidenceが存在しない場合"""
+
+    def __init__(self, evidence_id):
+        super().__init__(
+            message=f"Evidence with ID {evidence_id} not found.",
+            code="EVIDENCE_NOT_FOUND",
         )

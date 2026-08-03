@@ -205,3 +205,24 @@ def test_trial_balance_get_max_amount_record(db, setup_accounts):
     liability_row = tb_map[liability.id]
     assert liability_row["balance"] == expected_total
     assert liability_row["side"] == Side.CREDIT
+
+
+def test_trial_balance_invalid_date_format():
+    """不正な日付形式の場合、ApplicationValidationErrorが発生すること"""
+    from utils.exceptions.application_errors import ApplicationValidationError
+
+    with pytest.raises(ApplicationValidationError) as excinfo:
+        TrialBalanceService.get("2026/01/01", None)
+
+    assert excinfo.value.code == "INVALID_DATE_FORMAT"
+
+
+def test_trial_balance_invalid_date_range():
+    """start_date が end_date より後の場合、ApplicationValidationErrorが発生すること"""
+    from utils.exceptions.application_errors import ApplicationValidationError
+
+    with pytest.raises(ApplicationValidationError) as excinfo:
+        TrialBalanceService.get("2026-02-01", "2026-01-01")
+
+    assert excinfo.value.code == "INVALID_DATE_RANGE"
+

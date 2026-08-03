@@ -7,6 +7,7 @@ from journal.models.journal import Journal
 from journal.models.evidence import Evidence
 from journal.services.evidence import EvidenceService
 from journal.exceptions.journal_exceptions import (
+    EvidenceNotFoundError,
     JournalNotFoundError,
     InvalidJournalIdError,
     EvidenceCreateError,
@@ -88,6 +89,11 @@ def test_list(db):
     assert list(items) == [e2, e1]
 
 
+def test_list_journal_not_found(db):
+    with pytest.raises(JournalNotFoundError):
+        EvidenceService.list("99999999-9999-9999-9999-999999999999")
+
+
 def test_list_other_journal_excluded(db):
     j1 = Journal.objects.create(
         id="11111111-1111-1111-1111-111111111111",
@@ -109,3 +115,28 @@ def test_list_other_journal_excluded(db):
     assert items[0].journal_id == Journal.to_uuid(
         "11111111-1111-1111-1111-111111111111"
     )
+
+
+def test_get_download_url_success(db):
+    journal = Journal.objects.create(
+        id="11111111-1111-1111-1111-111111111111",
+        description="test",
+        recorded_date=timezone.now(),
+    )
+    evidence = Evidence.objects.create(journal=journal, key="evidence/test.pdf")
+
+    with patch("journal.services.evidence.DownloadService") as mock_service:
+        mock_service.return_value.generate_presigned_get_url.return_value = {
+            "url": "https://example.com/presigned"
+        }
+        result = EvidenceService.get_download_url(evidence.id)
+
+    assert result == {"url": "https://example.com/presigned"}
+    mock_service.return_value.generate_presigned_get_url.assert_called_once_with(
+        "evidence/test.pdf"
+    )
+
+
+def test_get_download_url_not_found(db):
+    with pytest.raises(EvidenceNotFoundError):
+        EvidenceService.get_download_url(99999)

@@ -207,23 +207,15 @@ def test_journal_with_lines_view_history(client):
     assert resp.json() == fake_history
 
 
-# def test_journal_with_lines_view_create_error():
-#     """エラーハンドル：未実装"""
-#     client = APIClient()
-#     payload = {
-#         "id": "11111111-1111-1111-1111-111111111111",
-#         "recorded_date": "2026-01-01",
-#         "lines": [],
-#     }
+def test_journal_with_lines_view_list_unhandled_error_returns_500(client):
+    """想定外エラーは500の汎用メッセージになること"""
+    service_path = "journal.views.journal_with_lines.JournalWithLinesService.list"
 
-#     input_path = "journal.views.journal_with_lines.JournalWithLinesInputSerializer"
-#     output_path = "journal.views.journal_with_lines.JournalWithLinesOutputSerializer"
-#     service_path = "journal.views.journal_with_lines.JournalWithLinesService.create"
+    with patch(service_path, side_effect=RuntimeError("secret internal detail")):
+        resp = client.get(BASE_LIST)
 
-#     with patch(input_path, new=DummyInputSerializer), patch(
-#         output_path, new=DummyOutputSerializer
-#     ), patch(service_path, side_effect=Exception("boom")) as mock_create:
-#         resp = client.post(BASE_CREATE, payload, format="json")
-
-#     mock_create.assert_called_once()
-#     assert resp.status_code in (500, 400, 422)
+    assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    body = resp.json()
+    assert body["error"]["code"] == "INTERNAL_SERVER_ERROR"
+    assert body["error"]["message"] == "An unexpected error occurred."
+    assert "secret internal detail" not in str(body)

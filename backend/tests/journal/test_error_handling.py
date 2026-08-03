@@ -10,6 +10,8 @@ from journal.services.journal_with_lines import JournalWithLinesService
 BASE_CREATE = "/api/journal/"
 BASE_CANCEL = "/api/journal/cancel/{journal_id}/"
 BASE_REVISE = "/api/journal/revise/{journal_id}/"
+BASE_EVIDENCE_LIST = "/api/journal/evidence/list/{journal_id}/"
+BASE_TRIAL_BALANCE = "/api/journal/trial_balance/"
 
 
 def test_create_rolls_back_when_bulk_create_fails(db, setup_accounts):
@@ -168,3 +170,21 @@ def test_view_unhandled_error_returns_generic_500(client):
     assert body["error"]["code"] == "INTERNAL_SERVER_ERROR"
     assert body["error"]["message"] == "An unexpected error occurred."
     assert "secret internal detail" not in str(body)
+
+
+def test_evidence_list_journal_not_found_returns_404(client, db):
+    """存在しない仕訳の証憑一覧で404が返ること"""
+    journal_id = "99999999-9999-9999-9999-999999999999"
+    resp = client.get(BASE_EVIDENCE_LIST.format(journal_id=journal_id))
+
+    assert resp.status_code == status.HTTP_404_NOT_FOUND
+    assert resp.json()["error"]["code"] == "JOURNAL_NOT_FOUND"
+
+
+def test_trial_balance_invalid_date_returns_400(client, db):
+    """不正な日付形式で400が返ること"""
+    resp = client.get(BASE_TRIAL_BALANCE, {"start_date": "2026/01/01"})
+
+    assert resp.status_code == status.HTTP_400_BAD_REQUEST
+    assert resp.json()["error"]["code"] == "INVALID_DATE_FORMAT"
+

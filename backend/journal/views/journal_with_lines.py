@@ -59,9 +59,3 @@ class JournalWithLinesHistoryAPIView(APIView):
 
         return Response(output.data, status=status.HTTP_200_OK)
 
-        # if not history_journals:
-        #     return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # # 既存の出力用Serializerをそのまま使い回す
-        # serializer = JournalOutputSerializer(history_journals, many=True)
-        # return Response(serializer.data, status=status.HTTP_200_OK)
