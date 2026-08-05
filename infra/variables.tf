@@ -38,3 +38,14 @@ variable "db_password" {
     type        = string
     sensitive   = true
 }
+
+variable "github_org" {
+    description = "GitHub organization or user name for OIDC trust policy"
+    type        = string
+}
+
+variable "github_repo" {
+    description = "GitHub repository name for OIDC trust policy"
+    type        = string
+    default     = "journal-app"
+}
