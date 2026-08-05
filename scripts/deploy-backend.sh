@@ -9,6 +9,12 @@ cd "$APP_DIR"
 git fetch origin main
 git reset --hard origin/main
 
+# .env is created by root during EC2 bootstrap; ec2-user must own it to update
+if [ -f .env ]; then
+  sudo chown ec2-user:ec2-user .env
+  chmod 600 .env
+fi
+
 # Ensure production env vars survive git reset (not in repo .env)
 ensure_env_var() {
   local key="$1"
