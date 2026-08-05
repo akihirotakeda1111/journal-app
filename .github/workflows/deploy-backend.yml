@@ -24,14 +24,34 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AWS_REGION: ap-northeast-1
+      AWS_ROLE_ARN: ${{ vars.AWS_BACKEND_DEPLOY_ROLE_ARN || secrets.AWS_BACKEND_DEPLOY_ROLE_ARN }}
       EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
 
     steps:
+      - name: Validate required configuration
+        run: |
+          missing=0
+          if [ -z "${AWS_ROLE_ARN}" ]; then
+            echo "::error::AWS_BACKEND_DEPLOY_ROLE_ARN is not set (Repository Variables or Secrets)"
+            missing=1
+          elif [[ ! "${AWS_ROLE_ARN}" =~ ^arn:aws:iam::[0-9]+:role/ ]]; then
+            echo "::error::AWS_BACKEND_DEPLOY_ROLE_ARN must be a full IAM role ARN"
+            missing=1
+          fi
+          if [ -z "${EC2_INSTANCE_ID}" ]; then
+            echo "::error::EC2_INSTANCE_ID is not set (Repository Variables)"
+            missing=1
+          fi
+          if [ "${missing}" -ne 0 ]; then
+            exit 1
+          fi
+
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ vars.AWS_BACKEND_DEPLOY_ROLE_ARN }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ap-northeast-1
+          role-session-name: github-actions-backend-${{ github.run_id }}
 
       - name: Deploy via SSM Run Command
         run: |

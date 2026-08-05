@@ -15,7 +15,7 @@ resource "aws_iam_openid_connect_provider" "github" {
 }
 
 locals {
-  github_oidc_sub = "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/main"
+  github_oidc_sub = "repo:${var.github_org}/${var.github_repo}:*"
 }
 
 resource "aws_iam_role" "github_frontend_deploy" {
