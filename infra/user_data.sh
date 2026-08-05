@@ -13,7 +13,8 @@ cd /home/ec2-user
 git clone https://github.com/akihirotakeda1111/journal-app.git
 sudo chown -R ec2-user:ec2-user journal-app
 cd journal-app
-sed -i "s/ALLOWED_HOSTS = .*/ALLOWED_HOSTS = ['api.journal-app.a-t-dev.com']/" backend/config/settings.py
+echo "ALLOWED_HOSTS=api.journal-app.a-t-dev.com" >> .env
+echo "CORS_ALLOWED_ORIGINS=https://journal-app.a-t-dev.com" >> .env
 
 # output .env
 echo "DB_HOST=${db_host}" >> .env
