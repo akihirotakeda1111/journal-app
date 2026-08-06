@@ -8,6 +8,27 @@ from journal.services.evidence import EvidenceService
 from journal.exceptions.journal_exceptions import EvidenceMetadataMissingError
 
 
+def test_register_from_s3_creates_evidence_with_underscore_metadata_key(db):
+    journal = Journal.objects.create(
+        id="11111111-1111-1111-1111-111111111111",
+        description="test",
+        recorded_date=timezone.now(),
+    )
+
+    with patch("journal.services.evidence.S3Service") as mock_s3:
+        mock_s3.return_value.head_object_metadata.return_value = {
+            "journal_id": str(journal.id),
+        }
+
+        evidence, created = EvidenceService.register_from_s3(
+            "test-bucket",
+            "evidence/new.pdf",
+        )
+
+    assert created is True
+    assert evidence.key == "evidence/new.pdf"
+
+
 def test_register_from_s3_creates_evidence(db):
     journal = Journal.objects.create(
         id="11111111-1111-1111-1111-111111111111",

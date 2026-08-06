@@ -1,4 +1,5 @@
 from django.db import transaction, IntegrityError
+import logging
 
 from journal.models.evidence import Evidence
 from journal.models.journal import Journal
@@ -14,6 +15,8 @@ from utils.services.s3 import S3Service
 
 JOURNAL_ID_METADATA_KEYS = ("journal-id", "journal_id")
 
+logger = logging.getLogger(__name__)
+
 
 class EvidenceService:
 
@@ -23,6 +26,12 @@ class EvidenceService:
             value = metadata.get(key)
             if value:
                 return value
+
+        for key, value in metadata.items():
+            normalized = key.lower().replace("_", "-")
+            if normalized == "journal-id" and value:
+                return value
+
         return None
 
     @staticmethod
@@ -61,6 +70,12 @@ class EvidenceService:
         metadata = S3Service().head_object_metadata(bucket, key)
         journal_id = EvidenceService._extract_journal_id(metadata)
         if not journal_id:
+            logger.warning(
+                "Evidence metadata missing for s3://%s/%s metadata=%s",
+                bucket,
+                key,
+                metadata,
+            )
             raise EvidenceMetadataMissingError(key)
 
         journal = EvidenceService._get_journal(journal_id)
