@@ -1,7 +1,7 @@
-django
-djangorestframework
+django==6.0.4
+djangorestframework==3.16.1
 psycopg2-binary
-django-cors-headers
+django-cors-headers>=4.0
 uuid6
 pytest
 pytest-django
