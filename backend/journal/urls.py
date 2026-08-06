@@ -9,6 +9,7 @@ from journal.views.journal_with_lines import (
 from journal.views.trial_balance import TrialBalanceAPIView
 from journal.views.evidence_upload import EvidenceUploadAPIView
 from journal.views.evidence_download import EvidenceDownloadAPIView
+from journal.views.evidence_webhook import EvidenceWebhookAPIView
 from journal.views.evidence import (
     JournalEvidenceCreateAPIView,
     JournalEvidenceListAPIView,
@@ -24,6 +25,7 @@ urlpatterns = [
     ),
     path("journal/trial_balance/", TrialBalanceAPIView.as_view()),
     path("journal/evidence/upload/", EvidenceUploadAPIView.as_view()),
+    path("journal/evidence/webhook/", EvidenceWebhookAPIView.as_view()),
     path(
         "journal/evidence/download/<int:evidence_id>/",
         EvidenceDownloadAPIView.as_view(),

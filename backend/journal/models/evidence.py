@@ -8,6 +8,6 @@ class Evidence(models.Model):
         related_name="evidences",
     )
 
-    key = models.CharField(max_length=255)
+    key = models.CharField(max_length=255, unique=True)
 
     uploaded_at = models.DateTimeField(auto_now_add=True)

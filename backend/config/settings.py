@@ -98,6 +98,7 @@ AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_S3_REGION = os.getenv("AWS_S3_REGION", "ap-northeast-1")
 AWS_S3_UPLOAD_BUCKET = os.getenv("AWS_S3_UPLOAD_BUCKET")
+WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET")
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

@@ -97,3 +97,13 @@ class EvidenceNotFoundError(RecordNotFoundError):
             message=f"Evidence with ID {evidence_id} not found.",
             code="EVIDENCE_NOT_FOUND",
         )
+
+
+class EvidenceMetadataMissingError(ApplicationValidationError):
+    """S3オブジェクトにjournal_idメタデータが存在しない場合"""
+
+    def __init__(self, key: str):
+        super().__init__(
+            message=f"S3 object metadata missing journal_id for key: {key}",
+            code="EVIDENCE_METADATA_MISSING",
+        )

@@ -22,3 +22,7 @@ class S3Service:
             )
 
         self.bucket = settings.AWS_S3_UPLOAD_BUCKET
+
+    def head_object_metadata(self, bucket: str, key: str) -> dict:
+        response = self.s3.head_object(Bucket=bucket, Key=key)
+        return response.get("Metadata", {})
