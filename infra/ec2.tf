@@ -19,6 +19,7 @@ resource "aws_instance" "django" {
         db_user = var.db_user
         db_password = var.db_password
         s3_upload_bucket = aws_s3_bucket.uploads.bucket
+        webhook_secret = var.webhook_secret
     })
 
     tags = {
@@ -94,7 +95,8 @@ resource "aws_iam_policy" "uploads_s3_policy" {
                 Effect = "Allow"
                 Action = [
                     "s3:PutObject",
-                    "s3:GetObject"
+                    "s3:GetObject",
+                    "s3:HeadObject"
                 ]
                 Resource = "${aws_s3_bucket.uploads.arn}/*"
             }

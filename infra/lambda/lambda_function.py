@@ -25,6 +25,10 @@ def _post_webhook(bucket: str, key: str) -> None:
             status = response.status
     except urllib.error.HTTPError as exc:
         status = exc.code
+        body = exc.read().decode("utf-8", errors="replace")
+        print(
+            f"Webhook failed: status={status} bucket={bucket} key={key} body={body}"
+        )
         if status >= 500:
             raise RuntimeError(
                 f"Django webhook returned {status} for s3://{bucket}/{key}"
@@ -35,6 +39,8 @@ def _post_webhook(bucket: str, key: str) -> None:
         raise RuntimeError(
             f"Django webhook returned {status} for s3://{bucket}/{key}"
         )
+
+    print(f"Webhook succeeded: status={status} bucket={bucket} key={key}")
 
 
 def lambda_handler(event, context):

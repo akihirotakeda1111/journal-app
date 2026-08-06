@@ -25,6 +25,7 @@ echo "POSTGRES_DB=${db_name}" >> .env
 echo "POSTGRES_USER=${db_user}" >> .env
 echo "POSTGRES_PASSWORD=${db_password}" >> .env
 echo "AWS_S3_UPLOAD_BUCKET=${s3_upload_bucket}" >> .env
+echo "WEBHOOK_SECRET=${webhook_secret}" >> .env
 chown ec2-user:ec2-user .env
 chmod 600 .env
 
