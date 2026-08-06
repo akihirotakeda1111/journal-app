@@ -33,3 +33,11 @@ output "github_backend_deploy_role_arn" {
 output "aws_region" {
   value = var.region
 }
+
+output "evidence_webhook_lambda_name" {
+  value = aws_lambda_function.evidence_webhook.function_name
+}
+
+output "uploads_s3_bucket" {
+  value = aws_s3_bucket.uploads.bucket
+}

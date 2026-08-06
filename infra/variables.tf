@@ -49,3 +49,16 @@ variable "github_repo" {
     type        = string
     default     = "journal-app"
 }
+
+variable "django_webhook_url" {
+    description = "Django evidence webhook URL. Override with ngrok URL for local apply."
+    type        = string
+    default     = null
+}
+
+variable "webhook_secret" {
+    description = "Shared secret for Lambda -> Django evidence webhook Authorization header"
+    type        = string
+    sensitive   = true
+    default     = "local-dev-webhook-secret"
+}
