@@ -64,29 +64,17 @@ git clone https://github.com/akihirotakeda1111/journal-app.git
 ### 2. 環境変数の設定
 
 ルートディレクトリに.envを作成する。
-（.env.exampleを参照）
 
-### 3. Docker(backend, db)の起動
+```bash
+cd journal-app
+copy .env.example .env
+```
+
+### 3. Docker(backend, frontend, db)の起動
 
 ```bash
 cd journal-app
 docker compose up -d
-```
-
-### 4. DB構築
-
-```bash
-docker compose exec backend python manage.py makemigrations
-docker compose exec backend python manage.py migrate
-docker compose exec backend python manage.py loaddata account.json
-```
-
-### 5. frontendの起動
-
-```bash
-cd frontend
-npm install
-npm run dev
 ```
 
 ## URL
