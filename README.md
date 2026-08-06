@@ -1,3 +1,7 @@
+# journal-app
+
+システム概要: [docs/SYSTEM_OVERVIEW.md](docs/SYSTEM_OVERVIEW.md)
+
 # ER
 
 ```mermaid
